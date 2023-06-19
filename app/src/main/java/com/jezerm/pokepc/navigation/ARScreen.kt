@@ -49,17 +49,24 @@ fun ARScreen() {
 
     val constraints = ConstraintSet {
         val inventoryBox = createRefFor("inventoryBox")
+        val inventoryToggleBox = createRefFor("inventoryToggleBox")
         val timerBox = createRefFor("timerBox")
 
         constrain(inventoryBox) {
-            bottom.linkTo(parent.bottom)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            width = Dimension.matchParent
+            bottom.linkTo(parent.bottom, margin = 5.dp)
+            start.linkTo(parent.start, margin = 5.dp)
+            width = Dimension.wrapContent
             height = Dimension.value(80.dp)
         }
+        constrain(inventoryToggleBox) {
+            bottom.linkTo(parent.bottom, margin = 5.dp)
+            start.linkTo(inventoryBox.end)
+            end.linkTo(parent.end)
+            width = Dimension.wrapContent
+            height = Dimension.wrapContent
+        }
         constrain(timerBox) {
-            top.linkTo(parent.top)
+            top.linkTo(parent.top, margin = 5.dp)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
             width = Dimension.value(200.dp)
@@ -115,9 +122,21 @@ fun ARScreen() {
 
             Box(
                 modifier = Modifier
-                    .background(Color.Gray)
+                    .layoutId("inventoryToggleBox")
+            ) {
+                //Placeholder por ahora
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(Color.Black)
+                        .border(5.dp, Color.Gray)
+                )
+            }
+
+            Box(
+                modifier = Modifier
                     .layoutId("timerBox")
-                    .background(color = Color.Black)
+                    .background(Color.Black)
                     .border(5.dp, Color.Gray)
             )
         }
