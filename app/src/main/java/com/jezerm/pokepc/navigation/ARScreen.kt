@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.node.ArModelNode
