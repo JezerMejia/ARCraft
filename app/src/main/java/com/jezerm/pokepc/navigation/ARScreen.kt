@@ -41,22 +41,28 @@ fun ARScreen() {
     val context = LocalContext.current
     val nodes = remember { mutableStateListOf<ArNode>() }
 
-//    val chestNode = CreateNode("chest", context)
+    val chestNode = CreateNode("chest", context)
     val craftingTableNode = CreateNode("crafting_table", context)
     val furnaceNode = CreateNode("furnace", context)
     val cowNode = CreateNode("cow", context)
     val chickenNode = CreateNode("chicken", context)
-    val whitherNode = CreateNode("whither", context)
-    val beaconNode = CreateNode("whither", context)
+    val witherNode = CreateNode("wither", context)
+    val beaconNode = CreateNode("beacon", context)
+    val earthNode = CreateNode("earth", context)
 
-
-//    nodes.add(chestNode)
+    chestNode.children[0].onTap = { motionEvent, renderable ->
+        Toast.makeText(
+            context, "Chest opened", Toast.LENGTH_LONG)   // Toast Notification
+            .show();
+    }
+    nodes.add(chestNode)
     nodes.add(craftingTableNode)
     nodes.add(furnaceNode)
     nodes.add(cowNode)
     nodes.add(chickenNode)
-    nodes.add(whitherNode)
+    nodes.add(witherNode)
     nodes.add(beaconNode)
+    nodes.add(earthNode)
 
     Box(modifier = Modifier.fillMaxSize()) {
         ARScene(
@@ -77,4 +83,5 @@ fun ARScreen() {
             }
         )
     }
+
 }
