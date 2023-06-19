@@ -3,12 +3,14 @@ package com.jezerm.pokepc.navigation
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import com.jezerm.pokepc.dialog.InventoryDialog
 import io.github.sceneview.ar.ARScene
 import io.github.sceneview.ar.node.ArModelNode
 import io.github.sceneview.ar.node.ArNode
@@ -29,6 +32,13 @@ import io.github.sceneview.math.Position
 fun ARScreen() {
     val context = LocalContext.current
     val nodes = remember { mutableStateListOf<ArNode>() }
+
+    val showInventoryDialog = remember { mutableStateOf(false) }
+
+    if (showInventoryDialog.value)
+          InventoryDialog(setShowDialog = {
+              showInventoryDialog.value = it
+          })
 
     val earthNode = AugmentedImageNode(
         "earth",
@@ -117,6 +127,12 @@ fun ARScreen() {
                             .background(color = Color.Black)
                             .border(5.dp, Color.Gray)
                     )
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .background(color = Color.Black)
+                            .border(5.dp, Color.Gray)
+                    )
                 }
             }
 
@@ -130,6 +146,10 @@ fun ARScreen() {
                         .size(80.dp)
                         .background(Color.Black)
                         .border(5.dp, Color.Gray)
+                        .clickable {
+                            // onClick
+                            showInventoryDialog.value = true
+                        }
                 )
             }
 
