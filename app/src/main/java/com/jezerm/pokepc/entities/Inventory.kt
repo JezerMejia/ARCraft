@@ -44,7 +44,7 @@ open class Inventory(val size: Int = 20) {
     fun addItem(item: Item, quantity: Int = 1): Boolean {
         var itemDto = items.find { itemDto -> itemDto.item == item }
         // If there is already an item and it's stackable, return false
-        if (itemDto != null && itemDto.item.stackable) return false
+        if (itemDto != null && !itemDto.item.stackable) return false
         // If there is no item, create a DTO for it
         if (itemDto == null) {
             val emptyPosition = findEmptyPosition()
