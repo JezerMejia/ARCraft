@@ -16,4 +16,7 @@ interface ItemDtoDao {
 
     @Delete
     fun deleteItemDto(itemDto: ItemDto)
+
+    @Query("DELETE FROM tblItem")
+    fun deleteAll()
 }
