@@ -21,7 +21,7 @@ val Typography = Typography(
     ),
     button = TextStyle(
         fontWeight = FontWeight.Black,
-        fontSize = 14.sp
+        fontSize = 16.sp
     ),
     h1 = TextStyle(
         fontWeight = FontWeight.Bold,
@@ -30,7 +30,15 @@ val Typography = Typography(
     h2 = TextStyle(
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
-    )
+    ),
+    h3 = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+    ),
+    h4 = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+    ),
 /* Other default text styles to override
 caption = TextStyle(
     fontFamily = FontFamily.Default,
