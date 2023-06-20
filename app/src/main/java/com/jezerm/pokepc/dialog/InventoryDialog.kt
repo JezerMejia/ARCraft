@@ -45,7 +45,7 @@ import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.ui.theme.PixelBorderShape
 
 @Composable
-fun InventoryGrid() {
+private fun InventoryGrid() {
     val items = ArrayList<Pair<Item, Int>>()
 
     for (i in 1..20) {
