@@ -8,7 +8,7 @@ class InventoryTest {
     private val inventory = Inventory()
 
     @Test
-    fun addItem() {
+    fun addItems() {
         inventory.addItem(Item.GLASS)
         inventory.addItem(Item.WOOD, 4)
         inventory.addItem(Item.OBSIDIAN, 2)
@@ -17,6 +17,19 @@ class InventoryTest {
             ItemDto(Item.GLASS, 1, 1),
             ItemDto(Item.WOOD, 4, 2),
             ItemDto(Item.OBSIDIAN, 2, 3),
+        ), inventory.items.toArray())
+    }
+    @Test
+    fun addSameItem() {
+        inventory.addItem(Item.GLASS, 2)
+
+        assertArrayEquals(arrayOf(
+            ItemDto(Item.GLASS, 2, 1),
+        ), inventory.items.toArray())
+
+        inventory.addItem(Item.GLASS, 4)
+        assertArrayEquals(arrayOf(
+            ItemDto(Item.GLASS, 6, 1),
         ), inventory.items.toArray())
     }
 
