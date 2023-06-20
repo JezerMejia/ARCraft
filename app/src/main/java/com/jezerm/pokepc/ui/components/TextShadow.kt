@@ -8,24 +8,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun TextShadow(
     text: String = "",
+    modifier: Modifier = Modifier,
     style: TextStyle = MaterialTheme.typography.body1,
-    textAlign: TextAlign = TextAlign.Start
+    textAlign: TextAlign = TextAlign.Start,
+    fontWeight: FontWeight = FontWeight.Normal
 ) {
     BoxWithConstraints {
         Text(
             text,
             color = Color(50, 50, 50),
-            modifier = Modifier.absoluteOffset(1.5.dp, 1.4.dp),
+            modifier = modifier.absoluteOffset(1.5.dp, 1.4.dp),
             textAlign = textAlign,
+            fontWeight = fontWeight,
             style = style
         )
-        Text(text, color = Color.White, textAlign = textAlign, style = style)
+        Text(
+            text,
+            modifier = modifier,
+            color = Color.White,
+            textAlign = textAlign,
+            fontWeight = fontWeight,
+            style = style
+        )
     }
 }
 

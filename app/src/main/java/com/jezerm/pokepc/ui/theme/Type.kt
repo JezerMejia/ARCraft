@@ -34,7 +34,11 @@ val Typography = Typography(
     h3 = TextStyle(
         fontWeight = FontWeight.Bold,
         fontSize = 24.sp,
-    )
+    ),
+    h4 = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+    ),
 /* Other default text styles to override
 caption = TextStyle(
     fontFamily = FontFamily.Default,
