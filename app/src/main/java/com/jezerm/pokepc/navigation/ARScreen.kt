@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -53,7 +52,6 @@ import com.google.ar.core.AugmentedImageDatabase
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
-import com.jezerm.pokepc.ui.theme.PixelBorderShape
 import com.jezerm.pokepc.utils.CreateNode
 import io.github.sceneview.node.Node
 
