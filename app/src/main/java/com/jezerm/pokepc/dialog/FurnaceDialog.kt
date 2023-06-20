@@ -57,7 +57,7 @@ fun FurnaceDialog(setShowDialog: (Boolean) -> Unit) {
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        TextShadow(text = "Horno", MaterialTheme.typography.h3)
+                        TextShadow(text = "Horno", style = MaterialTheme.typography.h3)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

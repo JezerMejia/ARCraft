@@ -62,7 +62,7 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        TextShadow(text = "Mesa de Crafteo", MaterialTheme.typography.h3)
+                        TextShadow(text = "Mesa de Crafteo", style = MaterialTheme.typography.h3)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))

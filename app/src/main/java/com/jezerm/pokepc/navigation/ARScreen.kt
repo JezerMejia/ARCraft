@@ -33,9 +33,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import com.jezerm.pokepc.R
+import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
+import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.theme.PixelBorderShape
 import io.github.sceneview.ar.ARScene
@@ -53,6 +55,7 @@ fun ARScreen() {
     val showInventoryDialog = remember { mutableStateOf(false) }
     val showCraftingDialog = remember { mutableStateOf(false) }
     val showSmeltingDialog = remember { mutableStateOf(false) }
+    val showChestDialog = remember { mutableStateOf(false) }
 
     if (showInventoryDialog.value)
           InventoryDialog(setShowDialog = {
@@ -68,6 +71,11 @@ fun ARScreen() {
         FurnaceDialog(setShowDialog = {
             showSmeltingDialog.value = it
         })
+
+    if (showChestDialog.value)
+        ChestInventoryDialog(setShowDialog = {
+            showSmeltingDialog.value = it
+        }, "", Inventory())
 
     val earthNode = AugmentedImageNode(
         "earth",
@@ -162,6 +170,9 @@ fun ARScreen() {
                     )
                     Box(
                         modifier = hotbarSlotModifier
+                            .clickable {
+                                showChestDialog.value = true
+                            }
                     )
                     Box(
                         modifier = hotbarSlotModifier
@@ -206,9 +217,9 @@ fun ARScreen() {
                         .padding(24.dp, 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    TextShadow("Tiempo Restante", MaterialTheme.typography.h3, TextAlign.Center)
+                    TextShadow("Tiempo Restante", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
                     Spacer(modifier = Modifier.height(8.dp))
-                    TextShadow("XX:XX", MaterialTheme.typography.h3, TextAlign.Center)
+                    TextShadow("XX:XX", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
                 }
             }
         }
