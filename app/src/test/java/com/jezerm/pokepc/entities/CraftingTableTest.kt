@@ -1,7 +1,8 @@
 package com.jezerm.pokepc.entities
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import com.jezerm.pokepc.data.ItemDto
+import kotlinx.coroutines.*
+import org.junit.Assert.*
 import org.junit.Test
 
 class CraftingTableTest {
@@ -86,5 +87,45 @@ class CraftingTableTest {
             )
         )
         assertNotEquals(Item.STICK, craftingTable.craftRecipe())
+    }
+
+    @Test
+    fun moveItemsToCraftingTable() {
+        val inventory = Inventory()
+        inventory.addItem(Item.SUGAR_CANE, 4)
+        craftingTable.moveItemFromInventory(inventory, Item.SUGAR_CANE)
+
+        assertArrayEquals(
+            arrayOf(
+                ItemDto(Item.SUGAR_CANE, 1, 1, craftingTable.getId())
+            ),
+            craftingTable.items.toArray()
+        )
+        assertArrayEquals(
+            arrayOf(
+                ItemDto(Item.SUGAR_CANE, 3, 1, inventory.getId())
+            ),
+            inventory.items.toArray()
+        )
+    }
+
+    @Test
+    fun moveItemsToPlayerInventory() {
+        val inventory = Inventory()
+        inventory.addItem(Item.SUGAR_CANE, 4)
+        craftingTable.addItem(Item.SUGAR_CANE, 1)
+
+        craftingTable.moveAllItemsToInventory(inventory)
+
+        assertArrayEquals(
+            arrayOf(),
+            craftingTable.items.toArray()
+        )
+        assertArrayEquals(
+            arrayOf(
+                ItemDto(Item.SUGAR_CANE, 5, 1, inventory.getId())
+            ),
+            inventory.items.toArray()
+        )
     }
 }

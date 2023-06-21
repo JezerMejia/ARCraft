@@ -4,16 +4,17 @@ import androidx.room.*
 import com.jezerm.pokepc.entities.Item
 
 // Position starts from 1
-@Entity("tblItem")
+@Entity("tblItem", primaryKeys = ["itemId", "inventoryId"])
 @TypeConverters(ItemConverter::class)
 data class ItemDto(
-    @PrimaryKey
     @ColumnInfo("itemId")
     val item: Item,
     @ColumnInfo("quantity")
     var quantity: Int,
     @ColumnInfo("position")
-    var position: Int
+    var position: Int,
+    @ColumnInfo("inventoryId")
+    var inventoryId: Int
 )
 
 class ItemConverter {
