@@ -85,7 +85,7 @@ fun ARScreen() {
 
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {
-            showSmeltingDialog.value = it
+            showChestDialog.value = it
         }, "", Inventory())
 
     val chestNode = CreateNode("chest", context)
