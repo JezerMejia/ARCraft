@@ -1,11 +1,11 @@
 package com.jezerm.pokepc.data
 
 import androidx.annotation.WorkerThread
+import com.jezerm.pokepc.entities.Inventory
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
 
 class RoomRepository private constructor(private val dao: ItemDtoDao) {
-    val itemsDto: Flow<List<ItemDto>> = dao.getAll()
+    fun getInventory(inventory: Inventory) = dao.getInventory(inventory)
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
