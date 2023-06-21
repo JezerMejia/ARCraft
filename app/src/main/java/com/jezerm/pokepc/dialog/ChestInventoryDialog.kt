@@ -84,7 +84,7 @@ fun InventoryGrid(inventory: Inventory) {
     LazyVerticalGrid(
         modifier = Modifier
             .widthIn(100.dp, 224.dp)
-            .heightIn(100.dp, 200.dp),
+            .heightIn(100.dp, 180.dp),
         columns = GridCells.Fixed(5),
         userScrollEnabled = false
     ) {

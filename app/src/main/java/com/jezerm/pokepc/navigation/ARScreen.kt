@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -23,7 +25,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -40,10 +46,12 @@ import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.ui.components.TextShadow
 import io.github.sceneview.ar.ARScene
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import com.google.ar.core.AugmentedImageDatabase
 import com.jezerm.pokepc.R
-import com.jezerm.pokepc.ui.theme.PixelBorderShape
+import com.jezerm.pokepc.ui.modifiers.insetBorder
+import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
 import io.github.sceneview.node.Node
 
@@ -52,6 +60,8 @@ import io.github.sceneview.node.Node
 fun ARScreen() {
     val context = LocalContext.current
     val nodes = remember { mutableStateListOf<Node>() }
+
+    val grayColor = Color(198, 198, 198)
 
     val showInventoryDialog = remember { mutableStateOf(false) }
     val showCraftingDialog = remember { mutableStateOf(false) }
@@ -75,7 +85,7 @@ fun ARScreen() {
 
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {
-            showSmeltingDialog.value = it
+            showChestDialog.value = it
         }, "", Inventory())
 
     val chestNode = CreateNode("chest", context)
@@ -130,11 +140,6 @@ fun ARScreen() {
         }
     }
 
-    val hotbarSlotModifier = Modifier
-        .size(60.dp)
-        .background(color = Color(143, 143, 143))
-        .border(2.dp, Color(85, 85, 85))
-
     Box(modifier = Modifier.fillMaxSize()) {
         ARScene(
             modifier = Modifier.fillMaxSize(),
@@ -180,81 +185,163 @@ fun ARScreen() {
             }
         )
         ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
-            Surface(
-                modifier = Modifier
-                    .layoutId("inventoryBox"),
-                shape = PixelBorderShape()
-            ) {
-                Row(
+            Surface(modifier = Modifier.layoutId("inventoryBox")) {
+                Card(
                     modifier = Modifier
-                        .background(Color(143, 143, 143))
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .clip(RectangleShape)
+                        .outsetBorder(lightSize = 8.dp, darkSize = 10.dp, borderPadding = 0.dp),
+                    shape = RectangleShape,
+                    backgroundColor = grayColor
                 ) {
-                    Box(
-                        modifier = hotbarSlotModifier
-                            .clickable {
-                                showCraftingDialog.value = true
-                            }
-                    )
-                    Box(
-                        modifier = hotbarSlotModifier
-                            .clickable {
-                                showSmeltingDialog.value = true
-                            }
-                    )
-                    Box(
-                        modifier = hotbarSlotModifier
-                            .clickable {
-                                showChestDialog.value = true
-                            }
-                    )
-                    Box(
-                        modifier = hotbarSlotModifier
-                    )
-                }
-            }
-
-            Surface(
-                modifier = Modifier
-                    .layoutId("inventoryToggleBox"),
-                shape = PixelBorderShape()
-            ) {
-                //Placeholder por ahora
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .background(Color.Gray)
-                        .clickable {
-                            // onClick
-                            showInventoryDialog.value = true
-                        }
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.inventory_icon),
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
+                    Row(
                         modifier = Modifier
-                            .size(70.dp)
-                            .align(Alignment.Center)
-                    )
+                            .background(Color(143, 143, 143))
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val imageBitmap = ImageBitmap.imageResource(R.drawable.air)
+
+                        Surface(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clickable {
+                                    showCraftingDialog.value = true
+                                },
+                            color = Color(139, 139, 139)
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .clip(RectangleShape)
+                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .padding(4.dp),
+                                bitmap = imageBitmap,
+                                filterQuality = FilterQuality.None,
+                                contentDescription = "",
+                                contentScale = ContentScale.FillWidth,
+                                alignment = Alignment.Center
+                            )
+                        }
+                        Surface(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clickable {
+                                    showSmeltingDialog.value = true
+                                },
+                            color = Color(139, 139, 139)
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .clip(RectangleShape)
+                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .padding(4.dp),
+                                bitmap = imageBitmap,
+                                filterQuality = FilterQuality.None,
+                                contentDescription = "",
+                                contentScale = ContentScale.FillWidth,
+                                alignment = Alignment.Center
+                            )
+                        }
+
+                        Surface(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clickable {
+                                    showChestDialog.value = true
+                                },
+                            color = Color(139, 139, 139)
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .clip(RectangleShape)
+                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .padding(4.dp),
+                                bitmap = imageBitmap,
+                                filterQuality = FilterQuality.None,
+                                contentDescription = "",
+                                contentScale = ContentScale.FillWidth,
+                                alignment = Alignment.Center
+                            )
+                        }
+                        Surface(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clickable {
+
+                                },
+                            color = Color(139, 139, 139)
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .clip(RectangleShape)
+                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .padding(4.dp),
+                                bitmap = imageBitmap,
+                                filterQuality = FilterQuality.None,
+                                contentDescription = "",
+                                contentScale = ContentScale.FillWidth,
+                                alignment = Alignment.Center
+                            )
+                        }
+                    }
                 }
             }
 
-            Surface(
-                modifier = Modifier
-                    .layoutId("timerBox"),
-                shape = PixelBorderShape()
-            ) {
-                Column(
+            Surface(modifier = Modifier.layoutId("inventoryToggleBox")) {
+                Card(
                     modifier = Modifier
-                        .background(Color(143, 143, 143))
-                        .padding(24.dp, 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .clip(RectangleShape)
+                        .outsetBorder(lightSize = 8.dp, darkSize = 10.dp, borderPadding = 0.dp),
+                    shape = RectangleShape,
+                    backgroundColor = grayColor
                 ) {
-                    TextShadow("Tiempo Restante", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextShadow("XX:XX", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
+                    //Placeholder por ahora
+                    Box(
+                        modifier = Modifier
+                            .size(92.dp)
+                            .background(Color.Gray)
+                            .clickable {
+                                // onClick
+                                showInventoryDialog.value = true
+                            }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.inventory_icon),
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(76.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                }
+            }
+
+            Surface(modifier = Modifier.layoutId("timerBox")) {
+                Card(
+                    modifier = Modifier
+                        .clip(RectangleShape)
+                        .outsetBorder(lightSize = 8.dp, darkSize = 10.dp, borderPadding = 0.dp),
+                    shape = RectangleShape,
+                    backgroundColor = grayColor
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .background(Color(143, 143, 143))
+                            .padding(24.dp, 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TextShadow("Tiempo Restante", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextShadow("XX:XX", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
+                    }
                 }
             }
         }
