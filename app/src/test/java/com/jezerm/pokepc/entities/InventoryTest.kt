@@ -16,9 +16,9 @@ class InventoryTest {
 
         assertArrayEquals(
             arrayOf(
-                ItemDto(Item.GLASS, 1, 1),
-                ItemDto(Item.WOOD, 4, 2),
-                ItemDto(Item.OBSIDIAN, 2, 3),
+                ItemDto(Item.GLASS, 1, 1, inventory.getId()),
+                ItemDto(Item.WOOD, 4, 2, inventory.getId()),
+                ItemDto(Item.OBSIDIAN, 2, 3, inventory.getId()),
             ), inventory.items.toArray()
         )
     }
@@ -29,14 +29,14 @@ class InventoryTest {
 
         assertArrayEquals(
             arrayOf(
-                ItemDto(Item.GLASS, 2, 1),
+                ItemDto(Item.GLASS, 2, 1, inventory.getId()),
             ), inventory.items.toArray()
         )
 
         inventory.addItem(Item.GLASS, 4)
         assertArrayEquals(
             arrayOf(
-                ItemDto(Item.GLASS, 6, 1),
+                ItemDto(Item.GLASS, 6, 1, inventory.getId()),
             ), inventory.items.toArray()
         )
     }
@@ -52,8 +52,8 @@ class InventoryTest {
 
         assertArrayEquals(
             arrayOf(
-                ItemDto(Item.GLASS, 1, 1),
-                ItemDto(Item.OBSIDIAN, 1, 3),
+                ItemDto(Item.GLASS, 1, 1, inventory.getId()),
+                ItemDto(Item.OBSIDIAN, 1, 3, inventory.getId()),
             ), inventory.items.toArray()
         )
     }

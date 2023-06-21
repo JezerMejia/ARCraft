@@ -46,7 +46,7 @@ class InventoryTest {
             assertEquals(0, inventory.items.size)
 
             val repository = RoomRepository.getInstance()
-            repository.insert(ItemDto(Item.WOOD, 1, 1))
+            repository.insert(ItemDto(Item.WOOD, 1, 1, inventory.getId()))
 
             inventory.initFromDatabase()
             assertEquals(1, inventory.items.size)
@@ -66,6 +66,16 @@ class InventoryTest {
             assertEquals(2, inventory.items.size)
             assert(inventory.items.any { v -> v.item == Item.GLASS })
             assert(inventory.items.any { v -> v.item == Item.WOOD && v.quantity == 4 })
+        }.join()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class, DelicateCoroutinesApi::class)
+    @Test
+    fun undoChanges() = runTest(UnconfinedTestDispatcher()) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val craftingTable = CraftingTable()
+            inventory.addItem(Item.SUGAR, 4)
+            craftingTable.moveItemFromInventory(inventory, Item.SUGAR)
         }.join()
     }
 }
