@@ -305,7 +305,7 @@ fun ARScreen() {
                     //Placeholder por ahora
                     Box(
                         modifier = Modifier
-                            .size(80.dp)
+                            .size(92.dp)
                             .background(Color.Gray)
                             .clickable {
                                 // onClick
@@ -317,7 +317,7 @@ fun ARScreen() {
                             contentDescription = "",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(70.dp)
+                                .size(76.dp)
                                 .align(Alignment.Center)
                         )
                     }
