@@ -2,13 +2,11 @@ package com.jezerm.pokepc.navigation
 
 import androidx.compose.foundation.Image
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -16,19 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,7 +44,6 @@ import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
-import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.ui.components.TextShadow
 import io.github.sceneview.ar.ARScene
 import androidx.compose.ui.layout.ContentScale
@@ -58,12 +51,11 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import com.google.ar.core.AugmentedImageDatabase
 import com.jezerm.pokepc.R
-import com.jezerm.pokepc.dialog.InventoryGrid
+import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
-import io.github.sceneview.node.Node
 
 @Preview
 @Composable
@@ -75,7 +67,9 @@ fun ARScreen() {
     val showInventoryDialog = remember { mutableStateOf(false) }
     val showCraftingDialog = remember { mutableStateOf(false) }
     val showSmeltingDialog = remember { mutableStateOf(false) }
+
     val showChestDialog = remember { mutableStateOf(false) }
+    val lastChestOpened = remember { mutableStateOf(0) }
 
     var currentHotbar = ArrayList<Pair<Item, Int>>()
     val latestSelectedItem = remember { mutableStateOf(-1) }
@@ -102,7 +96,7 @@ fun ARScreen() {
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {
             showChestDialog.value = it
-        }, "", Inventory())
+        }, lastChestOpened.value)
 
     val constraints = ConstraintSet {
         val inventoryBox = createRefFor("inventoryBox")
@@ -138,6 +132,7 @@ fun ARScreen() {
             onCreate = { arSceneView ->
                 val chestNode = CreateNode("chest", context)
                 val enderChestNode = CreateNode("ender_chest", context)
+                val xmasChestNode = CreateNode("xmas_chest", context)
                 val craftingTableNode = CreateNode("crafting_table", context)
                 val furnaceNode = CreateNode("furnace", context)
                 val cowNode = CreateNode("cow", context)
@@ -150,6 +145,15 @@ fun ARScreen() {
                     showCraftingDialog.value = true
                 }
                 chestNode.onTap = { motionEvent, renderable ->
+                    lastChestOpened.value = Chest.ChestType.ONE.value
+                    showChestDialog.value = true
+                }
+                enderChestNode.onTap = { motionEvent, renderable ->
+                    lastChestOpened.value = Chest.ChestType.TWO.value
+                    showChestDialog.value = true
+                }
+                xmasChestNode.onTap = { motionEvent, renderable ->
+                    lastChestOpened.value = Chest.ChestType.THREE.value
                     showChestDialog.value = true
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
@@ -159,6 +163,7 @@ fun ARScreen() {
                 arSceneView.addChild(craftingTableNode)
                 arSceneView.addChild(chestNode)
                 arSceneView.addChild(enderChestNode)
+                arSceneView.addChild(xmasChestNode)
                 arSceneView.addChild(furnaceNode)
                 arSceneView.addChild(cowNode)
                 arSceneView.addChild(chickenNode)
@@ -171,6 +176,7 @@ fun ARScreen() {
                     database.addImage("crafting_table", craftingTableNode.bitmap, 0.15f)
                     database.addImage("chest", chestNode.bitmap, 0.15f)
                     database.addImage("ender_chest", enderChestNode.bitmap, 0.15f)
+                    database.addImage("xmas_chest", xmasChestNode.bitmap, 0.15f)
                     database.addImage("furnace", furnaceNode.bitmap, 0.15f)
                     database.addImage("cow", cowNode.bitmap, 0.15f)
                     database.addImage("chicken", chickenNode.bitmap, 0.15f)
