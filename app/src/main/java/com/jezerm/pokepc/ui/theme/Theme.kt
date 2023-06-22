@@ -9,6 +9,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -41,9 +42,13 @@ fun PokePCTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable
     val colors = DarkColorPalette
 
     val systemUiController = rememberSystemUiController()
-    systemUiController.setSystemBarsColor(
-        color = Color.Transparent
-    )
+    DisposableEffect(systemUiController) {
+        systemUiController.isStatusBarVisible = false
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent
+        )
+        onDispose { }
+    }
 
     val image = ImageBitmap.imageResource(com.jezerm.pokepc.R.drawable.light_dirt_background)
     val bitmap = Bitmap.createScaledBitmap(image.asAndroidBitmap(), 120, 120, false)

@@ -4,21 +4,7 @@ import androidx.compose.foundation.Image
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -199,7 +185,7 @@ fun ARScreen() {
                 }
             },
         )
-        ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
+        ConstraintLayout(constraints, modifier = Modifier.fillMaxSize().displayCutoutPadding()) {
 
             val hotbarItems = ArrayList<Pair<Item, Int>>()
 
@@ -207,7 +193,7 @@ fun ARScreen() {
                 val (item, pos) = currentHotbar.find { v -> v.second == i } ?: Pair(Item.AIR, i)
                 hotbarItems.add(item to pos)
             }
-
+            
             Surface(modifier = Modifier.layoutId("inventoryBox")) {
                 Card(
                     modifier = Modifier

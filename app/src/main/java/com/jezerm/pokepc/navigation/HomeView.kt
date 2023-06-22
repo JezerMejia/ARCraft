@@ -1,11 +1,14 @@
 package com.jezerm.pokepc.navigation
 
+import android.os.Build
+import android.view.WindowInsetsController
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -23,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.entities.Recipe
 import com.jezerm.pokepc.ui.components.BorderedButton
@@ -148,10 +152,29 @@ fun HomeView(controller: NavHostController) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
+    val systemUiController = rememberSystemUiController()
+    DisposableEffect(systemUiController) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            systemUiController.systemBarsBehavior =
+                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+        systemUiController.setStatusBarColor(color = Color(0, 0, 0, 100))
+        onDispose { }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         scaffoldState = scaffoldState,
+        topBar = {
+            Surface(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color(0, 0, 0, 100))
+                    .displayCutoutPadding()
+            ) {
+            }
+        },
         bottomBar = {
             Surface(
                 Modifier
