@@ -14,8 +14,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -50,6 +58,8 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import com.google.ar.core.AugmentedImageDatabase
 import com.jezerm.pokepc.R
+import com.jezerm.pokepc.dialog.InventoryGrid
+import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
@@ -67,10 +77,17 @@ fun ARScreen() {
     val showSmeltingDialog = remember { mutableStateOf(false) }
     val showChestDialog = remember { mutableStateOf(false) }
 
+    var currentHotbar = ArrayList<Pair<Item, Int>>()
+    val latestSelectedItem = remember { mutableStateOf(-1) }
+
     if (showInventoryDialog.value)
-          InventoryDialog(setShowDialog = {
-              showInventoryDialog.value = it
-          })
+        InventoryDialog(
+            setShowDialog = {
+                showInventoryDialog.value = it
+            }
+        ) {
+            currentHotbar = it
+        }
 
     if (showCraftingDialog.value)
         CraftingTableDialog(setShowDialog = {
@@ -177,6 +194,14 @@ fun ARScreen() {
             },
         )
         ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
+
+            val hotbarItems = ArrayList<Pair<Item, Int>>()
+
+            for (i in 1..4) {
+                val (item, pos) = currentHotbar.find { v -> v.second == i } ?: Pair(Item.AIR, i)
+                hotbarItems.add(item to pos)
+            }
+
             Surface(modifier = Modifier.layoutId("inventoryBox")) {
                 Card(
                     modifier = Modifier
@@ -185,118 +210,49 @@ fun ARScreen() {
                     shape = RectangleShape,
                     backgroundColor = grayColor
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .background(Color(143, 143, 143))
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val imageBitmap = ImageBitmap.imageResource(R.drawable.air)
-
-                        Surface(
+                    Column(modifier = Modifier.padding(16.dp, 8.dp)) {
+                        LazyVerticalGrid(
                             modifier = Modifier
-                                .size(60.dp)
-                                .clickable {
-                                    showCraftingDialog.value = true
-                                },
-                            color = Color(139, 139, 139)
+                                .widthIn(130.dp, 260.dp)
+                                .heightIn(80.dp, 76.dp),
+                            columns = GridCells.Fixed(4),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                            verticalArrangement = Arrangement.Center,
+                            userScrollEnabled = false
                         ) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .clip(RectangleShape)
-                                    .insetBorder(
-                                        lightSize = 4.dp,
-                                        darkSize = 4.dp,
-                                        borderPadding = 0.dp
+                            items(hotbarItems, key = { c -> c.second }) { (item, position) ->
+                                val imageBitmap = ImageBitmap.imageResource(item.image)
+                                Surface(
+                                    modifier = Modifier
+                                        .clickable {
+                                            latestSelectedItem.value = position
+                                        },
+                                    color = if (latestSelectedItem.value == position) Color(
+                                        94,
+                                        94,
+                                        94
                                     )
-                                    .padding(4.dp),
-                                bitmap = imageBitmap,
-                                filterQuality = FilterQuality.None,
-                                contentDescription = "",
-                                contentScale = ContentScale.FillWidth,
-                                alignment = Alignment.Center
-                            )
-                        }
-                        Surface(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clickable {
-                                    showSmeltingDialog.value = true
-                                },
-                            color = Color(139, 139, 139)
-                        ) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .clip(RectangleShape)
-                                    .insetBorder(
-                                        lightSize = 4.dp,
-                                        darkSize = 4.dp,
-                                        borderPadding = 0.dp
+                                    else Color(139, 139, 139)
+                                ) {
+                                    Image(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .wrapContentHeight()
+                                            .clip(RectangleShape)
+                                            .insetBorder(
+                                                lightSize = 4.dp,
+                                                darkSize = 4.dp,
+                                                borderPadding = 0.dp
+                                            )
+                                            .padding(4.dp),
+                                        bitmap = imageBitmap,
+                                        filterQuality = FilterQuality.None,
+                                        contentDescription = item.value,
+                                        contentScale = ContentScale.FillWidth,
+                                        alignment = Alignment.Center
                                     )
-                                    .padding(4.dp),
-                                bitmap = imageBitmap,
-                                filterQuality = FilterQuality.None,
-                                contentDescription = "",
-                                contentScale = ContentScale.FillWidth,
-                                alignment = Alignment.Center
-                            )
-                        }
-
-                        Surface(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clickable {
-                                    showChestDialog.value = true
-                                },
-                            color = Color(139, 139, 139)
-                        ) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .clip(RectangleShape)
-                                    .insetBorder(
-                                        lightSize = 4.dp,
-                                        darkSize = 4.dp,
-                                        borderPadding = 0.dp
-                                    )
-                                    .padding(4.dp),
-                                bitmap = imageBitmap,
-                                filterQuality = FilterQuality.None,
-                                contentDescription = "",
-                                contentScale = ContentScale.FillWidth,
-                                alignment = Alignment.Center
-                            )
-                        }
-                        Surface(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clickable {
-
-                                },
-                            color = Color(139, 139, 139)
-                        ) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight()
-                                    .clip(RectangleShape)
-                                    .insetBorder(
-                                        lightSize = 4.dp,
-                                        darkSize = 4.dp,
-                                        borderPadding = 0.dp
-                                    )
-                                    .padding(4.dp),
-                                bitmap = imageBitmap,
-                                filterQuality = FilterQuality.None,
-                                contentDescription = "",
-                                contentScale = ContentScale.FillWidth,
-                                alignment = Alignment.Center
-                            )
+                                }
+                            }
                         }
                     }
                 }
@@ -310,7 +266,6 @@ fun ARScreen() {
                     shape = RectangleShape,
                     backgroundColor = grayColor
                 ) {
-                    //Placeholder por ahora
                     Box(
                         modifier = Modifier
                             .size(92.dp)
@@ -346,9 +301,19 @@ fun ARScreen() {
                             .padding(24.dp, 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        TextShadow(modifier = Modifier, text = "Tiempo Restante", MaterialTheme.typography.h3, TextAlign.Center)
+                        TextShadow(
+                            modifier = Modifier,
+                            text = "Tiempo Restante",
+                            MaterialTheme.typography.h3,
+                            TextAlign.Center
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        TextShadow(modifier = Modifier, text = "XX:XX", MaterialTheme.typography.h3, TextAlign.Center)
+                        TextShadow(
+                            modifier = Modifier,
+                            text = "XX:XX",
+                            MaterialTheme.typography.h3,
+                            TextAlign.Center
+                        )
                     }
                 }
             }

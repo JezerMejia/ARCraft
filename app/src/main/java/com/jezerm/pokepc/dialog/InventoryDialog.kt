@@ -101,15 +101,21 @@ private fun InventoryGrid(inventory: ArrayList<ItemDto>) {
 }
 
 @Composable
-fun InventoryDialog(setShowDialog: (Boolean) -> Unit) {
-
+fun InventoryDialog(
+    setShowDialog: (Boolean) -> Unit,
+    setCurrentHotbar: (ArrayList<Pair<Item, Int>>) -> Unit
+) {
     val grayColor = Color(198, 198, 198)
 
     val inventory = Inventory()
 
     initInventory(inventory)
 
-    Dialog(onDismissRequest = { setShowDialog(false) }) {
+    Dialog(
+        onDismissRequest = {
+            setCurrentHotbar(ArrayList())
+            setShowDialog(false)
+        }) {
         Surface {
             Card(
                 modifier = Modifier
