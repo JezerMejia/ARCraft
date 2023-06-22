@@ -18,15 +18,24 @@ import com.jezerm.pokepc.data.ItemDtoRoomDatabase
 import com.jezerm.pokepc.data.RoomRepository
 import com.jezerm.pokepc.navigation.AppNavHost
 import com.jezerm.pokepc.ui.theme.PokePCTheme
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     // Get the database
     val database by lazy { ItemDtoRoomDatabase.getDatabase(this) }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Initialize the Room repository based in the ItemDto DAO
         RoomRepository.init(database.itemDtoDao())
+
+        GlobalScope.launch(Dispatchers.IO) {
+            database.runInTransaction {}
+        }
 
         setContent {
             PokePCTheme {
