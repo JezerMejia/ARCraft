@@ -338,9 +338,9 @@ fun ARScreen() {
                             .padding(24.dp, 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        TextShadow("Tiempo Restante", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
+                        TextShadow(modifier = Modifier, text = "Tiempo Restante", MaterialTheme.typography.h3, TextAlign.Center)
                         Spacer(modifier = Modifier.height(8.dp))
-                        TextShadow("XX:XX", Modifier, MaterialTheme.typography.h3, TextAlign.Center)
+                        TextShadow(modifier = Modifier, text = "XX:XX", MaterialTheme.typography.h3, TextAlign.Center)
                     }
                 }
             }

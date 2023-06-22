@@ -176,7 +176,7 @@ fun FurnaceDialog(setShowDialog: (Boolean) -> Unit) {
 
                                 }
                             ) {
-                                TextShadow("Honear", style = MaterialTheme.typography.button)
+                                TextShadow(text = "Honear", style = MaterialTheme.typography.button)
                             }
                         }
 

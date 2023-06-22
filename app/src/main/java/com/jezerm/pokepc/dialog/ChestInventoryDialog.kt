@@ -129,7 +129,7 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestName: String, in
                         horizontalArrangement = Arrangement.Center
                     ) {
                         TextShadow(
-                            "Cofre $chestName",
+                            text = "Cofre $chestName",
                             style = MaterialTheme.typography.h3,
                             textAlign = TextAlign.Center
                         )
@@ -153,7 +153,7 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestName: String, in
                         horizontalArrangement = Arrangement.Center
                     ) {
                         TextShadow(
-                            "Inventario",
+                            text = "Inventario",
                             style = MaterialTheme.typography.h3,
                             textAlign = TextAlign.Center
                         )

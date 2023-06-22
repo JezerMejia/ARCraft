@@ -87,7 +87,7 @@ fun RecipeContainer(recipe: Recipe) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             RecipeGrid(recipe)
-            TextShadow(recipe.result.value, fontWeight = FontWeight.Bold)
+            TextShadow(text = recipe.result.value, fontWeight = FontWeight.Bold)
             val imageBitmap = ImageBitmap.imageResource(recipe.result.image)
             Surface(color = Color(139, 139, 139)) {
                 Image(
@@ -120,8 +120,8 @@ fun LazyGridScope.RecipeCards() {
 
     item(span = { GridItemSpan(2) }) {
         TextShadow(
-            "Objetivos",
-            Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
+            text = "Objetivos",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h4
         )
@@ -131,8 +131,8 @@ fun LazyGridScope.RecipeCards() {
     }
     item(span = { GridItemSpan(2) }) {
         TextShadow(
-            "Recetas básicas",
-            Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
+            text = "Recetas básicas",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h4
         )
@@ -167,7 +167,7 @@ fun HomeView(controller: NavHostController) {
                         controller.navigate("poke")
                     }
                 ) {
-                    TextShadow("Abrir AR", style = MaterialTheme.typography.button)
+                    TextShadow(text = "Abrir AR", style = MaterialTheme.typography.button)
                 }
             }
         },
@@ -193,9 +193,9 @@ fun HomeView(controller: NavHostController) {
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            TextShadow("ARCraft", style = MaterialTheme.typography.h1)
+                            TextShadow(text = "ARCraft", style = MaterialTheme.typography.h1)
                             TextShadow(
-                                "Minecraft en Realidad Aumentada",
+                                text = "Minecraft en Realidad Aumentada",
                                 style = MaterialTheme.typography.h3,
                                 textAlign = TextAlign.Center
                             )
@@ -208,7 +208,7 @@ fun HomeView(controller: NavHostController) {
                                 controller.navigate("howto")
                             }
                         ) {
-                            TextShadow("¿Cómo se juega?", fontWeight = FontWeight.Bold)
+                            TextShadow(text = "¿Cómo se juega?", fontWeight = FontWeight.Bold)
                         }
                     }
 

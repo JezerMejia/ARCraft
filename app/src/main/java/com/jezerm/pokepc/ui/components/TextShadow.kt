@@ -14,8 +14,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TextShadow(
-    text: String = "",
     modifier: Modifier = Modifier,
+    text: String = "",
     style: TextStyle = MaterialTheme.typography.body1,
     textAlign: TextAlign = TextAlign.Start,
     fontWeight: FontWeight = FontWeight.Normal

@@ -186,7 +186,7 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
 
                                 }
                             ) {
-                                TextShadow("Craftear", style = MaterialTheme.typography.button)
+                                TextShadow(text = "Craftear", style = MaterialTheme.typography.button)
                             }
                         }
 
