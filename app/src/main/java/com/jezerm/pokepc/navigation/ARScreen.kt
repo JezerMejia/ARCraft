@@ -59,7 +59,6 @@ import io.github.sceneview.node.Node
 @Composable
 fun ARScreen() {
     val context = LocalContext.current
-    val nodes = remember { mutableStateListOf<Node>() }
 
     val grayColor = Color(198, 198, 198)
 
@@ -87,31 +86,6 @@ fun ARScreen() {
         ChestInventoryDialog(setShowDialog = {
             showChestDialog.value = it
         }, "", Inventory())
-
-    val chestNode = CreateNode("chest", context)
-    val enderChestNode = CreateNode("ender_chest", context)
-    val craftingTableNode = CreateNode("crafting_table", context)
-    val furnaceNode = CreateNode("furnace", context)
-    val cowNode = CreateNode("cow", context)
-    val chickenNode = CreateNode("chicken", context)
-    val witherNode = CreateNode("wither", context)
-    val beaconNode = CreateNode("beacon", context)
-    val earthNode = CreateNode("earth", context)
-
-    craftingTableNode.children[0].onTap = { motionEvent, renderable ->
-        Toast.makeText(
-            context, "${nodes.size}", Toast.LENGTH_LONG)   // Toast Notification
-            .show();
-    }
-    nodes.add(craftingTableNode)
-    nodes.add(chestNode)
-    nodes.add(enderChestNode)
-    nodes.add(furnaceNode)
-    nodes.add(cowNode)
-    nodes.add(chickenNode)
-    nodes.add(witherNode)
-    nodes.add(beaconNode)
-    nodes.add(earthNode)
 
     val constraints = ConstraintSet {
         val inventoryBox = createRefFor("inventoryBox")
@@ -143,9 +117,37 @@ fun ARScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         ARScene(
             modifier = Modifier.fillMaxSize(),
-            nodes = nodes,
             planeRenderer = true,
             onCreate = { arSceneView ->
+                val chestNode = CreateNode("chest", context)
+                val enderChestNode = CreateNode("ender_chest", context)
+                val craftingTableNode = CreateNode("crafting_table", context)
+                val furnaceNode = CreateNode("furnace", context)
+                val cowNode = CreateNode("cow", context)
+                val chickenNode = CreateNode("chicken", context)
+                val witherNode = CreateNode("wither", context)
+                val beaconNode = CreateNode("beacon", context)
+                val earthNode = CreateNode("earth", context)
+
+                craftingTableNode.onTap = { motionEvent, renderable ->
+                    showCraftingDialog.value = true
+                }
+                chestNode.onTap = { motionEvent, renderable ->
+                    showChestDialog.value = true
+                }
+                furnaceNode.onTap = { motionEvent, renderable ->
+                    showSmeltingDialog.value = true
+                }
+
+                arSceneView.addChild(craftingTableNode)
+                arSceneView.addChild(chestNode)
+                arSceneView.addChild(enderChestNode)
+                arSceneView.addChild(furnaceNode)
+                arSceneView.addChild(cowNode)
+                arSceneView.addChild(chickenNode)
+                arSceneView.addChild(witherNode)
+                arSceneView.addChild(beaconNode)
+                arSceneView.addChild(earthNode)
 
                 arSceneView.configureSession { session, config ->
                     val database = AugmentedImageDatabase(session)
@@ -160,13 +162,6 @@ fun ARScreen() {
                     database.addImage("earth", earthNode.bitmap, 0.15f)
                     config.setAugmentedImageDatabase(database)
                 }
-//                arSceneView.onAugmentedImageUpdate += { augmentedImage ->
-//                    Log.d("SceneView", augmentedImage.name.toString())
-//                }
-//                arSceneView.addChild(craftingTableNode)
-//                arSceneView.addChild(chestNode)
-//                arSceneView.addChild(furnaceNode)
-//                arSceneView.addChild(craftingTableNode)
             },
             onSessionCreate = { session ->
                 // Configure the ARCore session
@@ -180,9 +175,6 @@ fun ARScreen() {
                     Log.d("SceneView", config.augmentedImageDatabase.numImages.toString())
                 }
             },
-            onTrackingFailureChanged = {
-                Log.e("SceneView", it.toString())
-            }
         )
         ConstraintLayout(constraints, modifier = Modifier.fillMaxSize()) {
             Surface(modifier = Modifier.layoutId("inventoryBox")) {
@@ -214,7 +206,11 @@ fun ARScreen() {
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .clip(RectangleShape)
-                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .insetBorder(
+                                        lightSize = 4.dp,
+                                        darkSize = 4.dp,
+                                        borderPadding = 0.dp
+                                    )
                                     .padding(4.dp),
                                 bitmap = imageBitmap,
                                 filterQuality = FilterQuality.None,
@@ -236,7 +232,11 @@ fun ARScreen() {
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .clip(RectangleShape)
-                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .insetBorder(
+                                        lightSize = 4.dp,
+                                        darkSize = 4.dp,
+                                        borderPadding = 0.dp
+                                    )
                                     .padding(4.dp),
                                 bitmap = imageBitmap,
                                 filterQuality = FilterQuality.None,
@@ -259,7 +259,11 @@ fun ARScreen() {
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .clip(RectangleShape)
-                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .insetBorder(
+                                        lightSize = 4.dp,
+                                        darkSize = 4.dp,
+                                        borderPadding = 0.dp
+                                    )
                                     .padding(4.dp),
                                 bitmap = imageBitmap,
                                 filterQuality = FilterQuality.None,
@@ -281,7 +285,11 @@ fun ARScreen() {
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .clip(RectangleShape)
-                                    .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                                    .insetBorder(
+                                        lightSize = 4.dp,
+                                        darkSize = 4.dp,
+                                        borderPadding = 0.dp
+                                    )
                                     .padding(4.dp),
                                 bitmap = imageBitmap,
                                 filterQuality = FilterQuality.None,
