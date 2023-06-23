@@ -1,7 +1,6 @@
 package com.jezerm.pokepc.entities
 
 import com.jezerm.pokepc.data.ItemDto
-import kotlinx.coroutines.*
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -55,8 +54,8 @@ class CraftingTableTest {
         craftingTable.items.clear()
         craftingTable.addItemsToPositions(
             listOf(
-                Item.WOOD to 1,
-                Item.WOOD to 4,
+                Item.OAK_PLANKS to 1,
+                Item.OAK_PLANKS to 4,
             )
         )
         assertEquals(Item.STICK, craftingTable.craftRecipe())
@@ -64,8 +63,8 @@ class CraftingTableTest {
         craftingTable.items.clear()
         craftingTable.addItemsToPositions(
             listOf(
-                Item.WOOD to 2,
-                Item.WOOD to 5,
+                Item.OAK_PLANKS to 2,
+                Item.OAK_PLANKS to 5,
             )
         )
         assertEquals(Item.STICK, craftingTable.craftRecipe())
@@ -73,8 +72,8 @@ class CraftingTableTest {
         craftingTable.items.clear()
         craftingTable.addItemsToPositions(
             listOf(
-                Item.WOOD to 6,
-                Item.WOOD to 9,
+                Item.OAK_PLANKS to 6,
+                Item.OAK_PLANKS to 9,
             )
         )
         assertEquals(Item.STICK, craftingTable.craftRecipe())
@@ -82,8 +81,8 @@ class CraftingTableTest {
         craftingTable.items.clear()
         craftingTable.addItemsToPositions(
             listOf(
-                Item.WOOD to 7,
-                Item.WOOD to 9,
+                Item.OAK_PLANKS to 7,
+                Item.OAK_PLANKS to 9,
             )
         )
         assertNotEquals(Item.STICK, craftingTable.craftRecipe())

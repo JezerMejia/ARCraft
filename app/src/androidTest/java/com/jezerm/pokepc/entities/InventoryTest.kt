@@ -46,7 +46,7 @@ class InventoryTest {
             assertEquals(0, inventory.items.size)
 
             val repository = RoomRepository.getInstance()
-            repository.insert(ItemDto(Item.WOOD, 1, 1, inventory.getId()))
+            repository.insert(ItemDto(Item.OAK_PLANKS, 1, 1, inventory.getId()))
 
             inventory.initFromDatabase()
             assertEquals(1, inventory.items.size)
@@ -58,14 +58,14 @@ class InventoryTest {
     fun saveToDatabase() = runTest(UnconfinedTestDispatcher()) {
         GlobalScope.launch(Dispatchers.IO) {
             inventory.addItem(Item.GLASS)
-            inventory.addItem(Item.WOOD, 4)
+            inventory.addItem(Item.OAK_PLANKS, 4)
             assertEquals(2, inventory.items.size)
 
             inventory.saveToDatabase()
             inventory.initFromDatabase()
             assertEquals(2, inventory.items.size)
             assert(inventory.items.any { v -> v.item == Item.GLASS })
-            assert(inventory.items.any { v -> v.item == Item.WOOD && v.quantity == 4 })
+            assert(inventory.items.any { v -> v.item == Item.OAK_PLANKS && v.quantity == 4 })
         }.join()
     }
 

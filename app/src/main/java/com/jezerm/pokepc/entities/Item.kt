@@ -6,7 +6,8 @@ enum class Item(val value: String, val image: Int = 0, val stackable: Boolean = 
     // Basic items
     AIR("", R.drawable.air, false),
     SAND("Arena", R.drawable.sand),
-    WOOD("Madera", R.drawable.oak_planks),
+    OAK_LOG("Tronco de madera", R.drawable.oak_log),
+    OAK_PLANKS("Tablones de madera", R.drawable.oak_planks),
     STICK("Palo", R.drawable.stick),
     IRON("Hierro", R.drawable.iron_ingot),
     DIAMOND("Diamante", R.drawable.diamond),
