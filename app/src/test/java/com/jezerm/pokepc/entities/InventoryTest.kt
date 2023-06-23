@@ -11,13 +11,13 @@ class InventoryTest {
     @Test
     fun addItems() {
         inventory.addItem(Item.GLASS)
-        inventory.addItem(Item.WOOD, 4)
+        inventory.addItem(Item.OAK_PLANKS, 4)
         inventory.addItem(Item.OBSIDIAN, 2)
 
         assertArrayEquals(
             arrayOf(
                 ItemDto(Item.GLASS, 1, 1, inventory.getId()),
-                ItemDto(Item.WOOD, 4, 2, inventory.getId()),
+                ItemDto(Item.OAK_PLANKS, 4, 2, inventory.getId()),
                 ItemDto(Item.OBSIDIAN, 2, 3, inventory.getId()),
             ), inventory.items.toArray()
         )
@@ -44,10 +44,10 @@ class InventoryTest {
     @Test
     fun removeItem() {
         inventory.addItem(Item.GLASS)
-        inventory.addItem(Item.WOOD, 4)
+        inventory.addItem(Item.OAK_PLANKS, 4)
         inventory.addItem(Item.OBSIDIAN, 2)
 
-        inventory.removeItem(Item.WOOD, 4)
+        inventory.removeItem(Item.OAK_PLANKS, 4)
         inventory.removeItem(Item.OBSIDIAN)
 
         assertArrayEquals(
@@ -61,12 +61,12 @@ class InventoryTest {
     @Test
     fun findEmptyPosition() {
         inventory.addItem(Item.GLASS)
-        inventory.addItem(Item.WOOD, 4)
+        inventory.addItem(Item.OAK_PLANKS, 4)
         inventory.addItem(Item.OBSIDIAN, 2)
 
         assertEquals(4, inventory.findEmptyPosition())
 
-        inventory.removeItem(Item.WOOD, 4)
+        inventory.removeItem(Item.OAK_PLANKS, 4)
         assertEquals(2, inventory.findEmptyPosition())
 
         inventory.removeItem(Item.GLASS)

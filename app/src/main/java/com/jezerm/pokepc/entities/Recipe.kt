@@ -4,8 +4,8 @@ enum class Recipe(val items: Array<Pair<Item, Int>>, val result: Item, val anyPo
     // Basic recipes
     STICK(
         arrayOf(
-            Item.WOOD to 1,
-            Item.WOOD to 4,
+            Item.OAK_PLANKS to 2,
+            Item.OAK_PLANKS to 5,
         ),
         Item.STICK,
         true

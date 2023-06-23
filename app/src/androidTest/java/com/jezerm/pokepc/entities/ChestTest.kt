@@ -51,21 +51,21 @@ class ChestTest {
             assertEquals(0, chestTwo.items.size)
 
             val repository = RoomRepository.getInstance()
-            repository.insert(ItemDto(Item.WOOD, 1, 1, chestOne.getId()))
+            repository.insert(ItemDto(Item.OAK_PLANKS, 1, 1, chestOne.getId()))
             repository.insert(ItemDto(Item.SUGAR, 6, 1, chestTwo.getId()))
-            repository.insert(ItemDto(Item.WOOD, 4, 2, chestTwo.getId()))
+            repository.insert(ItemDto(Item.OAK_PLANKS, 4, 2, chestTwo.getId()))
             // This should replace the previous value
-            repository.insert(ItemDto(Item.WOOD, 5, 2, chestTwo.getId()))
+            repository.insert(ItemDto(Item.OAK_PLANKS, 5, 2, chestTwo.getId()))
 
             chestOne.initFromDatabase()
             chestTwo.initFromDatabase()
 
             val expectedChestOne = arrayOf(
-                ItemDto(Item.WOOD, 1, 1, chestOne.getId())
+                ItemDto(Item.OAK_PLANKS, 1, 1, chestOne.getId())
             )
             val expectedChestTwo = arrayOf(
                 ItemDto(Item.SUGAR, 6, 1, chestTwo.getId()),
-                ItemDto(Item.WOOD, 5, 2, chestTwo.getId())
+                ItemDto(Item.OAK_PLANKS, 5, 2, chestTwo.getId())
             )
             assertArrayEquals(
                 expectedChestOne,
@@ -83,8 +83,8 @@ class ChestTest {
     fun saveToDatabase() = runTest(UnconfinedTestDispatcher()) {
         GlobalScope.launch(Dispatchers.IO) {
             chestOne.addItem(Item.GLASS)
-            chestTwo.addItem(Item.WOOD, 4)
-            chestTwo.addItem(Item.WOOD, 2)
+            chestTwo.addItem(Item.OAK_PLANKS, 4)
+            chestTwo.addItem(Item.OAK_PLANKS, 2)
             assertEquals(1, chestOne.items.size)
             assertEquals(1, chestTwo.items.size)
 
@@ -98,7 +98,7 @@ class ChestTest {
                 ItemDto(Item.GLASS, 1, 1, chestOne.getId())
             )
             val expectedChestTwo = arrayOf(
-                ItemDto(Item.WOOD, 6, 1, chestTwo.getId()),
+                ItemDto(Item.OAK_PLANKS, 6, 1, chestTwo.getId()),
             )
             assertArrayEquals(
                 expectedChestOne,
@@ -117,7 +117,7 @@ class ChestTest {
         GlobalScope.launch(Dispatchers.IO) {
             val inventory = Inventory()
             chestOne.addItem(Item.GLASS, 4)
-            chestOne.addItem(Item.WOOD, 2)
+            chestOne.addItem(Item.OAK_PLANKS, 2)
 
             chestOne.saveToDatabase()
             chestOne.moveAllItemsToInventory(inventory)
