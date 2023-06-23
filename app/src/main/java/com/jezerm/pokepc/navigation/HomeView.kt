@@ -231,7 +231,7 @@ fun HomeView(controller: NavHostController) {
                                 controller.navigate("howto")
                             }
                         ) {
-                            TextShadow(text = "¿Cómo se juega?", fontWeight = FontWeight.Bold)
+                            TextShadow(text = "¿Cómo se juega?", style = MaterialTheme.typography.button)
                         }
                     }
 
