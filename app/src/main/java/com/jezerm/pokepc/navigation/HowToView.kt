@@ -34,6 +34,7 @@ import com.jezerm.pokepc.ui.theme.PokePCTheme
 @Composable
 fun HowToView(controller: NavHostController) {
     val scaffoldState = rememberScaffoldState()
+    val scrollState = rememberForeverScrollState("howto")
 
     val systemUiController = rememberSystemUiController()
     DisposableEffect(systemUiController) {
@@ -74,7 +75,7 @@ fun HowToView(controller: NavHostController) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
-                        .verticalScroll(rememberScrollState()),
+                        .verticalScroll(scrollState),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
