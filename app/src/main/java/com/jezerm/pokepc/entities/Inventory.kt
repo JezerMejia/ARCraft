@@ -86,7 +86,9 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
 
     fun addItemToPosition(item: Item, quantity: Int = 1, position: Int = findEmptyPosition()): Boolean {
         var itemDto = items.find { itemDto -> itemDto.item == item && itemDto.position == position }
-        if (itemDto != null) return false
+        if (itemDto != null) {
+            return addItem(itemDto.item, quantity)
+        }
 
         itemDto = ItemDto(item, quantity, position, getId())
         items.add(itemDto)
@@ -109,8 +111,7 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
         if (!inventory.hasItem(item)) return false
         if (position == -1) return false
         inventory.removeItem(item)
-        this.addItemToPosition(item, quantity, position)
-        return true
+        return this.addItemToPosition(item, quantity, position)
     }
 
     fun moveItemToInventory(inventory: Inventory, item: Item, quantity: Int = 1): Boolean {

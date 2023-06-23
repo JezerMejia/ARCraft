@@ -2,6 +2,7 @@ package com.jezerm.pokepc.dialog
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.entities.Chest
@@ -33,18 +35,31 @@ import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
+import io.github.sceneview.light.position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun ChestGrid(chest: Chest) {
-    val items = remember { mutableStateListOf<ItemDto>() }
+fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.ChestType) {
 
     val scope = rememberCoroutineScope()
+
+    val chest = Chest(chestType)
+    val chestItems = remember { mutableStateListOf<ItemDto>() }
+    val latestSelectedChestItem = remember {
+        mutableStateOf(
+            ItemDto(
+                Item.AIR,
+                0,
+                -1,
+                0
+            )
+        )
+    }
     DisposableEffect(rememberSystemUiController()) {
         scope.launch(Dispatchers.IO) {
             chest.initFromDatabase()
-            items.clear()
+            chestItems.clear()
             for (i in 1..8) {
                 val item = chest.items.find { v -> v.position == i } ?: ItemDto(
                     Item.AIR,
@@ -53,61 +68,18 @@ fun ChestGrid(chest: Chest) {
                     chest.getId()
                 )
                 Log.d("Chest", "Position: $i, Item: ${item.item.value}")
-                items.add(item)
+                chestItems.add(item)
             }
         }
         onDispose { }
     }
 
-    LazyVerticalGrid(
-        modifier = Modifier
-            .widthIn(100.dp, 164.dp)
-            .heightIn(100.dp, 164.dp),
-        columns = GridCells.Fixed(4),
-        userScrollEnabled = false
-    ) {
-        items(items, key = { c -> c.position }) { itemDto ->
-            val item = itemDto.item
-            val quantity = itemDto.quantity
-            val imageBitmap = ImageBitmap.imageResource(item.image)
-            Surface(color = Color(139, 139, 139)) {
-                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
-                    Image(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .clip(RectangleShape)
-                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                            .padding(4.dp),
-                        bitmap = imageBitmap,
-                        filterQuality = FilterQuality.None,
-                        contentDescription = item.value,
-                        contentScale = ContentScale.FillWidth,
-                        alignment = Alignment.Center
-                    )
-                    if (item != Item.AIR) {
-                        TextShadow(
-                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
-                            text = quantity.toString(),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun InventoryGrid() {
     val inventory = Inventory()
-    val items = remember { mutableStateListOf<ItemDto>() }
-
-    val scope = rememberCoroutineScope()
+    val inventoryItems = remember { mutableStateListOf<ItemDto>() }
     DisposableEffect(rememberSystemUiController()) {
         scope.launch(Dispatchers.IO) {
             inventory.initFromDatabase()
-            items.clear()
+            inventoryItems.clear()
             for (i in 1..20) {
                 val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
                     Item.AIR,
@@ -116,59 +88,21 @@ private fun InventoryGrid() {
                     inventory.getId()
                 )
                 Log.d("PlayerInventory", "Position: $i, Item: ${item.item.value}")
-                items.add(item)
+                inventoryItems.add(item)
             }
         }
         onDispose { }
     }
 
-    LazyVerticalGrid(
-        modifier = Modifier
-            .widthIn(100.dp, 224.dp)
-            .heightIn(100.dp, 180.dp),
-        columns = GridCells.Fixed(5),
-        userScrollEnabled = false
-    ) {
-        items(items, key = { c -> c.position }) { itemDto ->
-            val item = itemDto.item
-            val quantity = itemDto.quantity
-            val imageBitmap = ImageBitmap.imageResource(item.image)
-            Surface(color = Color(139, 139, 139)) {
-                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
-                    Image(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .clip(RectangleShape)
-                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                            .padding(4.dp),
-                        bitmap = imageBitmap,
-                        filterQuality = FilterQuality.None,
-                        contentDescription = item.value,
-                        contentScale = ContentScale.FillWidth,
-                        alignment = Alignment.Center
-                    )
-                    if (item != Item.AIR) {
-                        TextShadow(
-                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
-                            text = quantity.toString(),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.ChestType) {
-    val chest = Chest(chestType)
-
     val grayColor = Color(198, 198, 198)
-    val scope = rememberCoroutineScope()
 
-    Dialog(onDismissRequest = { setShowDialog(false) }) {
+    Dialog(onDismissRequest = {
+        scope.launch(Dispatchers.IO) {
+            chest.saveToDatabase()
+            inventory.saveToDatabase()
+        }
+        setShowDialog(false)
+    }) {
         Surface {
             Card(
                 modifier = Modifier
@@ -218,7 +152,68 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        ChestGrid(chest)
+
+                        LazyVerticalGrid(
+                            modifier = Modifier
+                                .widthIn(100.dp, 164.dp)
+                                .heightIn(100.dp, 164.dp),
+                            columns = GridCells.Fixed(4),
+                            userScrollEnabled = false
+                        ) {
+                            items(chestItems, key = { c -> c.position }) { itemDto ->
+                                val item = itemDto.item
+                                val quantity = itemDto.quantity
+                                val imageBitmap = ImageBitmap.imageResource(item.image)
+                                Surface(
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (latestSelectedChestItem.value != itemDto) {
+                                                latestSelectedChestItem.value = itemDto
+                                            } else {
+                                                latestSelectedChestItem.value =
+                                                    ItemDto(Item.AIR, 0, -1, 0)
+                                            }
+                                        },
+                                    color = if (latestSelectedChestItem.value == itemDto) Color(
+                                        94,
+                                        94,
+                                        94
+                                    )
+                                    else Color(139, 139, 139)
+                                ) {
+                                    BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                                        Image(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                                .clip(RectangleShape)
+                                                .insetBorder(
+                                                    lightSize = 4.dp,
+                                                    darkSize = 4.dp,
+                                                    borderPadding = 0.dp
+                                                )
+                                                .padding(4.dp),
+                                            bitmap = imageBitmap,
+                                            filterQuality = FilterQuality.None,
+                                            contentDescription = item.value,
+                                            contentScale = ContentScale.FillWidth,
+                                            alignment = Alignment.Center
+                                        )
+                                        if (item != Item.AIR) {
+                                            TextShadow(
+                                                modifier = Modifier.padding(
+                                                    end = 3.dp,
+                                                    bottom = 3.dp
+                                                ),
+                                                text = quantity.toString(),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -242,7 +237,76 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        InventoryGrid()
+
+                        LazyVerticalGrid(
+                            modifier = Modifier
+                                .widthIn(100.dp, 224.dp)
+                                .heightIn(100.dp, 180.dp),
+                            columns = GridCells.Fixed(5),
+                            userScrollEnabled = false
+                        ) {
+                            items(inventoryItems, key = { c -> c.position }) { itemDto ->
+                                val item = itemDto.item
+                                val quantity = itemDto.quantity
+                                val position = itemDto.position
+                                val imageBitmap = ImageBitmap.imageResource(item.image)
+                                Surface(
+                                    modifier = Modifier
+                                        .clickable {
+                                            val selectedItem = latestSelectedChestItem.value.item
+
+                                            if ((item == Item.AIR) || (selectedItem == item) || (selectedItem != Item.AIR)) {
+                                                if (inventory.moveItemFromInventory(
+                                                        inventory = chest,
+                                                        item = selectedItem,
+                                                        quantity = quantity,
+                                                        position = position
+                                                    )
+                                                ) {
+                                                    latestSelectedChestItem.value = ItemDto(
+                                                        Item.AIR,
+                                                        0,
+                                                        -1,
+                                                        0
+                                                    )
+                                                }
+                                            }
+                                        },
+                                    color = Color(139, 139, 139)
+                                ) {
+                                    BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                                        Image(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                                .clip(RectangleShape)
+                                                .insetBorder(
+                                                    lightSize = 4.dp,
+                                                    darkSize = 4.dp,
+                                                    borderPadding = 0.dp
+                                                )
+                                                .padding(4.dp),
+                                            bitmap = imageBitmap,
+                                            filterQuality = FilterQuality.None,
+                                            contentDescription = item.value,
+                                            contentScale = ContentScale.FillWidth,
+                                            alignment = Alignment.Center
+                                        )
+                                        if (item != Item.AIR) {
+                                            TextShadow(
+                                                modifier = Modifier.padding(
+                                                    end = 3.dp,
+                                                    bottom = 3.dp
+                                                ),
+                                                text = quantity.toString(),
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                     }
                 }
             }
