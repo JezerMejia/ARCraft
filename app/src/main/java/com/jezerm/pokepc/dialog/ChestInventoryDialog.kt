@@ -1,28 +1,15 @@
 package com.jezerm.pokepc.dialog
 
-import androidx.annotation.Dimension
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,20 +23,39 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.R
+import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
-fun ChestGrid() {
-    val items = ArrayList<Pair<Item, Int>>()
+fun ChestGrid(chest: Chest) {
+    val items = remember { mutableStateListOf<Pair<Item, Int>>() }
 
-    for (i in 1..8) {
-        items.add(Item.AIR to i)
+    val scope = rememberCoroutineScope()
+    DisposableEffect(rememberSystemUiController()) {
+        scope.launch(Dispatchers.IO) {
+            chest.initFromDatabase()
+            items.clear()
+            for (i in 1..8) {
+                val item = chest.items.find { v -> v.position == i } ?: ItemDto(
+                    Item.AIR,
+                    1,
+                    i,
+                    chest.getId()
+                )
+                Log.d("Chest", "Position: $i, Item: $item")
+                items.add(item.item to item.position)
+            }
+        }
+        onDispose { }
     }
 
     LazyVerticalGrid(
@@ -82,10 +88,26 @@ fun ChestGrid() {
 
 @Composable
 private fun InventoryGrid() {
-    val items = ArrayList<Pair<Item, Int>>()
+    val inventory = Inventory()
+    val items = remember { mutableStateListOf<Pair<Item, Int>>() }
 
-    for (i in 1..20) {
-        items.add(Item.AIR to i)
+    val scope = rememberCoroutineScope()
+    DisposableEffect(rememberSystemUiController()) {
+        scope.launch(Dispatchers.IO) {
+            inventory.initFromDatabase()
+            items.clear()
+            for (i in 1..20) {
+                val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
+                    Item.AIR,
+                    1,
+                    i,
+                    inventory.getId()
+                )
+                Log.d("PlayerInventory", "Position: $i, Item: $item")
+                items.add(item.item to item.position)
+            }
+        }
+        onDispose { }
     }
 
     LazyVerticalGrid(
@@ -117,9 +139,11 @@ private fun InventoryGrid() {
 }
 
 @Composable
-fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Int) {
+fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.ChestType) {
+    val chest = Chest(chestType)
 
     val grayColor = Color(198, 198, 198)
+    val scope = rememberCoroutineScope()
 
     Dialog(onDismissRequest = { setShowDialog(false) }) {
         Surface {
@@ -136,12 +160,10 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Int) {
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        val chestImg = if (chestType == Chest.ChestType.ONE.value) {
-                            R.drawable.chest
-                        } else if (chestType == Chest.ChestType.TWO.value) {
-                            R.drawable.ender_chest
-                        } else {
-                            R.drawable.xmas_chest
+                        val chestImg = when (chestType) {
+                            Chest.ChestType.ONE -> R.drawable.chest
+                            Chest.ChestType.TWO -> R.drawable.ender_chest
+                            Chest.ChestType.THREE -> R.drawable.xmas_chest
                         }
 
                         Image(
@@ -173,7 +195,7 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Int) {
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        ChestGrid()
+                        ChestGrid(chest)
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))

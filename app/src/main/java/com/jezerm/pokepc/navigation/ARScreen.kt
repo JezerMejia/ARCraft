@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -58,7 +61,7 @@ fun ARScreen() {
     val lastChestOpened = remember { mutableStateOf(0) }
 
     var currentHotbar = ArrayList<Pair<Item, Int>>()
-    val latestSelectedItem = remember { mutableStateOf(-1) }
+    val latestSelectedItemPos = remember { mutableStateOf(-1) }
 
     if (showInventoryDialog.value)
         InventoryDialog(
@@ -217,9 +220,9 @@ fun ARScreen() {
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            latestSelectedItem.value = position
+                                            latestSelectedItemPos.value = position
                                         },
-                                    color = if (latestSelectedItem.value == position) Color(
+                                    color = if (latestSelectedItemPos.value == position) Color(
                                         94,
                                         94,
                                         94
