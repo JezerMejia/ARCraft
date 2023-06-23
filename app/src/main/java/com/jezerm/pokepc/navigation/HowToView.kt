@@ -65,7 +65,7 @@ fun HowToView(controller: NavHostController) {
             ) {
             }
         },
-        backgroundColor = Color.Transparent,
+        backgroundColor = Color(0, 0, 0, 70),
         contentColor = MaterialTheme.colors.onSurface,
     ) { innerPadding ->
         Surface(Modifier.padding(innerPadding), color = Color.Transparent) {
