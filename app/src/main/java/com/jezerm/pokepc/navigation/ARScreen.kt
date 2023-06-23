@@ -61,7 +61,7 @@ fun ARScreen() {
     val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
 
     var currentHotbar = ArrayList<Pair<Item, Int>>()
-    val latestSelectedItem = remember { mutableStateOf(-1) }
+    val latestSelectedItemPos = remember { mutableStateOf(-1) }
 
     if (showInventoryDialog.value)
         InventoryDialog(
@@ -227,9 +227,9 @@ fun ARScreen() {
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            latestSelectedItem.value = position
+                                            latestSelectedItemPos.value = position
                                         },
-                                    color = if (latestSelectedItem.value == position) Color(
+                                    color = if (latestSelectedItemPos.value == position) Color(
                                         94,
                                         94,
                                         94

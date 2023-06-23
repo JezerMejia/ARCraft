@@ -109,8 +109,7 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
         if (!inventory.hasItem(item)) return false
         if (position == -1) return false
         inventory.removeItem(item)
-        this.addItemToPosition(item, quantity, position)
-        return true
+        return this.addItemToPosition(item, quantity, position)
     }
 
     fun moveItemToInventory(inventory: Inventory, item: Item, quantity: Int = 1): Boolean {
