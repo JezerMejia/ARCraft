@@ -133,26 +133,35 @@ fun RecipeContainer(recipe: Recipe) {
             val interactionSource = remember { MutableInteractionSource() }
 
             Surface(color = Color(139, 139, 139)) {
-                Image(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(RectangleShape)
-                        .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                        .padding(6.dp)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = rememberRipple(bounded = true, color = blueColor),
-                            enabled = itemInfo != null,
-                            onClick = {
-                                selectedItemInfo.value = itemInfo!!
-                            }
-                        ),
-                    bitmap = ImageBitmap.imageResource(recipe.result.image),
-                    filterQuality = FilterQuality.None,
-                    contentDescription = recipe.result.value,
-                    contentScale = ContentScale.FillWidth,
-                    alignment = Alignment.Center
-                )
+                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                    Image(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(RectangleShape)
+                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                            .padding(6.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = rememberRipple(bounded = true, color = blueColor),
+                                enabled = itemInfo != null,
+                                onClick = {
+                                    selectedItemInfo.value = itemInfo!!
+                                }
+                            ),
+                        bitmap = ImageBitmap.imageResource(recipe.result.image),
+                        filterQuality = FilterQuality.None,
+                        contentDescription = recipe.result.value,
+                        contentScale = ContentScale.FillWidth,
+                        alignment = Alignment.Center
+                    )
+                    if (recipe.result != Item.AIR && recipe.quantity > 1) {
+                        TextShadow(
+                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
+                            text = recipe.quantity.toString(),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
