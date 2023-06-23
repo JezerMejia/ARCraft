@@ -86,9 +86,7 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
 
     fun addItemToPosition(item: Item, quantity: Int = 1, position: Int = findEmptyPosition()): Boolean {
         var itemDto = items.find { itemDto -> itemDto.item == item && itemDto.position == position }
-        if (itemDto != null) {
-            return addItem(itemDto.item, quantity)
-        }
+        if (itemDto != null) return false
 
         itemDto = ItemDto(item, quantity, position, getId())
         items.add(itemDto)

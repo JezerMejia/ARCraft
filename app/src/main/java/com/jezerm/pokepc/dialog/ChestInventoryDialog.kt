@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.entities.Chest
@@ -35,7 +34,6 @@ import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
-import io.github.sceneview.light.position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -46,16 +44,7 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
 
     val chest = Chest(chestType)
     val chestItems = remember { mutableStateListOf<ItemDto>() }
-    val latestSelectedChestItem = remember {
-        mutableStateOf(
-            ItemDto(
-                Item.AIR,
-                0,
-                -1,
-                0
-            )
-        )
-    }
+
     DisposableEffect(rememberSystemUiController()) {
         scope.launch(Dispatchers.IO) {
             chest.initFromDatabase()
@@ -167,19 +156,44 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            if (latestSelectedChestItem.value != itemDto) {
-                                                latestSelectedChestItem.value = itemDto
-                                            } else {
-                                                latestSelectedChestItem.value =
-                                                    ItemDto(Item.AIR, 0, -1, 0)
+                                            if (chest.moveItemToInventory(
+                                                    inventory = inventory,
+                                                    item = item,
+                                                    quantity = quantity
+                                                )
+                                            ) {
+                                                scope.launch(Dispatchers.IO) {
+                                                    chestItems.clear()
+                                                    for (i in 1..8) {
+                                                        val listItem =
+                                                            chest.items.find { v -> v.position == i }
+                                                                ?: ItemDto(
+                                                                    Item.AIR,
+                                                                    0,
+                                                                    i,
+                                                                    chest.getId()
+                                                                )
+                                                        Log.d(
+                                                            "Chest",
+                                                            "Position: $i, Item: ${listItem.item.value}"
+                                                        )
+                                                        chestItems.add(listItem)
+                                                    }
+                                                    inventoryItems.clear()
+                                                    for (i in 1..20) {
+                                                        val listItem = inventory.items.find { v -> v.position == i } ?: ItemDto(
+                                                            Item.AIR,
+                                                            1,
+                                                            i,
+                                                            inventory.getId()
+                                                        )
+                                                        Log.d("PlayerInventory", "Position: $i, Item: ${listItem.item.value}")
+                                                        inventoryItems.add(listItem)
+                                                    }
+                                                }
                                             }
                                         },
-                                    color = if (latestSelectedChestItem.value == itemDto) Color(
-                                        94,
-                                        94,
-                                        94
-                                    )
-                                    else Color(139, 139, 139)
+                                    color = Color(139, 139, 139)
                                 ) {
                                     BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
                                         Image(
@@ -248,32 +262,8 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                             items(inventoryItems, key = { c -> c.position }) { itemDto ->
                                 val item = itemDto.item
                                 val quantity = itemDto.quantity
-                                val position = itemDto.position
                                 val imageBitmap = ImageBitmap.imageResource(item.image)
-                                Surface(
-                                    modifier = Modifier
-                                        .clickable {
-                                            val selectedItem = latestSelectedChestItem.value.item
-
-                                            if ((item == Item.AIR) || (selectedItem == item) || (selectedItem != Item.AIR)) {
-                                                if (inventory.moveItemFromInventory(
-                                                        inventory = chest,
-                                                        item = selectedItem,
-                                                        quantity = quantity,
-                                                        position = position
-                                                    )
-                                                ) {
-                                                    latestSelectedChestItem.value = ItemDto(
-                                                        Item.AIR,
-                                                        0,
-                                                        -1,
-                                                        0
-                                                    )
-                                                }
-                                            }
-                                        },
-                                    color = Color(139, 139, 139)
-                                ) {
+                                Surface(color = Color(139, 139, 139)) {
                                     BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
                                         Image(
                                             modifier = Modifier
