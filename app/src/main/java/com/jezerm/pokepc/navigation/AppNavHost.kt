@@ -21,8 +21,10 @@ fun AppNavHost(
         composable("home") {
             HomeView(navController)
         }
+        composable("howto") {
+            HowToView(navController)
+        }
         composable("poke") {
-            // InsertView(navController)
             ARScreen()
         }
     }
