@@ -14,6 +14,6 @@ val chestTwoPopulate = arrayOf(
     ItemDto(Item.DIAMOND, 1, 5, Chest.ChestType.TWO.value),
 )
 val chestThreePopulate = arrayOf(
-    ItemDto(Item.WOOD, 8, 1, Chest.ChestType.THREE.value),
+    ItemDto(Item.OAK_PLANKS, 8, 1, Chest.ChestType.THREE.value),
     ItemDto(Item.DIAMOND, 1, 6, Chest.ChestType.THREE.value),
 )
