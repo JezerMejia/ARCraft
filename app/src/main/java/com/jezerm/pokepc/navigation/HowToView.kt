@@ -3,13 +3,17 @@ package com.jezerm.pokepc.navigation
 import android.os.Build
 import android.view.WindowInsetsController
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +23,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -26,10 +33,56 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.R
+import com.jezerm.pokepc.dialog.ImageDialog
 import com.jezerm.pokepc.ui.components.BorderedButton
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.ui.theme.PokePCTheme
+
+@Composable
+fun ImageWithDialog(
+    modifier: Modifier = Modifier,
+    resource: Int,
+    contentDescription: String
+) {
+    val imageBorderModifier = Modifier
+        .clip(RectangleShape)
+        .border(
+            BorderStroke(2.dp, Color.Black)
+        )
+        .outsetBorder(darkSize = 6.dp, lightSize = 4.dp, borderPadding = 2.dp)
+
+    val showDialog = remember { mutableStateOf(false) }
+    val bitmap = ImageBitmap.imageResource(resource)
+
+    if (showDialog.value) {
+        ImageDialog(
+            setShowDialog = { showDialog.value = it },
+            bitmap = bitmap,
+            contentDescription = contentDescription
+        )
+    }
+
+    val blueColor = Color(136, 146, 201)
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Image(
+        bitmap = bitmap,
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { role = Role.Image }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(bounded = true, color = blueColor),
+                onClick = {
+                    showDialog.value = true
+                }
+            )
+            .then(imageBorderModifier),
+        contentDescription = "Atardecer en Minecraft en un bioma de Cerezos",
+        contentScale = ContentScale.FillWidth
+    )
+}
 
 @Composable
 fun HowToView(controller: NavHostController) {
@@ -46,12 +99,6 @@ fun HowToView(controller: NavHostController) {
         onDispose { }
     }
 
-    val imageBorderModifier = Modifier
-        .clip(RectangleShape)
-        .border(
-            BorderStroke(2.dp, Color.Black)
-        )
-        .outsetBorder(darkSize = 6.dp, lightSize = 4.dp, borderPadding = 2.dp)
 
     Scaffold(
         modifier = Modifier
@@ -97,14 +144,10 @@ fun HowToView(controller: NavHostController) {
                                 "el que tendrás que sobrevivir a su mundo, o bien en el modo Creativo con el " +
                                 "cual podrás dar rienda suelta a tu creatividad."
                     )
-                    Image(
-                        bitmap = ImageBitmap.imageResource(R.drawable.minecraft_cherry_sunset),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .then(imageBorderModifier),
-                        contentDescription = "Atardecer en Minecraft en un bioma de Cerezos",
-                        contentScale = ContentScale.FillWidth
+                    ImageWithDialog(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        resource = R.drawable.minecraft_cherry_sunset,
+                        contentDescription = "Atardecer en Minecraft en un bioma de Cerezos"
                     )
                     TextShadow(
                         text = "Cómo jugar ARCraft",
@@ -131,28 +174,19 @@ fun HowToView(controller: NavHostController) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Image(
-                            modifier = Modifier
-                                .then(imageBorderModifier)
-                                .fillMaxWidth()
-                                .weight(1f),
-                            bitmap = ImageBitmap.imageResource(R.drawable.screenshot_chest_no_model),
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_chest_no_model,
                             contentDescription = "Cámara apuntando a una imagen de un cofre"
                         )
-                        Image(
-                            modifier = Modifier
-                                .then(imageBorderModifier)
-                                .fillMaxWidth()
-                                .weight(1f),
-                            bitmap = ImageBitmap.imageResource(R.drawable.screenshot_chest_model),
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_chest_model,
                             contentDescription = "Cámara apuntando al modelo 3D del cofre"
                         )
-                        Image(
-                            modifier = Modifier
-                                .then(imageBorderModifier)
-                                .fillMaxWidth()
-                                .weight(1f),
-                            bitmap = ImageBitmap.imageResource(R.drawable.screenshot_chest_open),
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_chest_open,
                             contentDescription = "Interfaz del cofre"
                         )
                     }
