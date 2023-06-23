@@ -58,7 +58,7 @@ fun ARScreen() {
     val showSmeltingDialog = remember { mutableStateOf(false) }
 
     val showChestDialog = remember { mutableStateOf(false) }
-    val lastChestOpened = remember { mutableStateOf(0) }
+    val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
 
     var currentHotbar = ArrayList<Pair<Item, Int>>()
     val latestSelectedItemPos = remember { mutableStateOf(-1) }
@@ -134,15 +134,15 @@ fun ARScreen() {
                     showCraftingDialog.value = true
                 }
                 chestNode.onTap = { motionEvent, renderable ->
-                    lastChestOpened.value = Chest.ChestType.ONE.value
+                    lastChestOpened.value = Chest.ChestType.ONE
                     showChestDialog.value = true
                 }
                 enderChestNode.onTap = { motionEvent, renderable ->
-                    lastChestOpened.value = Chest.ChestType.TWO.value
+                    lastChestOpened.value = Chest.ChestType.TWO
                     showChestDialog.value = true
                 }
                 xmasChestNode.onTap = { motionEvent, renderable ->
-                    lastChestOpened.value = Chest.ChestType.THREE.value
+                    lastChestOpened.value = Chest.ChestType.THREE
                     showChestDialog.value = true
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
