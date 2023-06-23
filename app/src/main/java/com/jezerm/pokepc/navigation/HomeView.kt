@@ -303,6 +303,16 @@ fun HomeView(controller: NavHostController) {
                             textAlign = TextAlign.Center
                         )
                     }
+                    item(span = { GridItemSpan(2) }) {
+                        BorderedButton(
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            onClick = {
+                                controller.navigate("debug")
+                            }
+                        ) {
+                            TextShadow(text = "DEBUG", style = MaterialTheme.typography.button)
+                        }
+                    }
 
                     RecipeCards()
                 }
