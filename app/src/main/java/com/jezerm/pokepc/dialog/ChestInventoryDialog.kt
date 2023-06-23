@@ -52,7 +52,7 @@ fun ChestGrid(chest: Chest) {
                     i,
                     chest.getId()
                 )
-                Log.d("Chest", "Position: $i, Item: $item")
+                Log.d("Chest", "Position: $i, Item: ${item.item.value}")
                 items.add(item)
             }
         }
@@ -101,7 +101,7 @@ fun ChestGrid(chest: Chest) {
 @Composable
 private fun InventoryGrid() {
     val inventory = Inventory()
-    val items = remember { mutableStateListOf<Pair<Item, Int>>() }
+    val items = remember { mutableStateListOf<ItemDto>() }
 
     val scope = rememberCoroutineScope()
     DisposableEffect(rememberSystemUiController()) {
@@ -115,8 +115,8 @@ private fun InventoryGrid() {
                     i,
                     inventory.getId()
                 )
-                Log.d("PlayerInventory", "Position: $i, Item: $item")
-                items.add(item.item to item.position)
+                Log.d("PlayerInventory", "Position: $i, Item: ${item.item.value}")
+                items.add(item)
             }
         }
         onDispose { }
@@ -129,22 +129,33 @@ private fun InventoryGrid() {
         columns = GridCells.Fixed(5),
         userScrollEnabled = false
     ) {
-        items(items, key = { c -> c.second }) { (item, position) ->
+        items(items, key = { c -> c.position }) { itemDto ->
+            val item = itemDto.item
+            val quantity = itemDto.quantity
             val imageBitmap = ImageBitmap.imageResource(item.image)
             Surface(color = Color(139, 139, 139)) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clip(RectangleShape)
-                        .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                        .padding(4.dp),
-                    bitmap = imageBitmap,
-                    filterQuality = FilterQuality.None,
-                    contentDescription = item.value,
-                    contentScale = ContentScale.FillWidth,
-                    alignment = Alignment.Center
-                )
+                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .clip(RectangleShape)
+                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                            .padding(4.dp),
+                        bitmap = imageBitmap,
+                        filterQuality = FilterQuality.None,
+                        contentDescription = item.value,
+                        contentScale = ContentScale.FillWidth,
+                        alignment = Alignment.Center
+                    )
+                    if (item != Item.AIR) {
+                        TextShadow(
+                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
+                            text = quantity.toString(),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
