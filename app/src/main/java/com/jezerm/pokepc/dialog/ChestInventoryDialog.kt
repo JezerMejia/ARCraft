@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,7 +30,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.entities.Chest
-import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder

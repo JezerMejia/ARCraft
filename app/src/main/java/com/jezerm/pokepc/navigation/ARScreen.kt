@@ -1,7 +1,7 @@
 package com.jezerm.pokepc.navigation
 
-import androidx.compose.foundation.Image
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,30 +21,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import com.google.ar.core.AugmentedImageDatabase
+import com.jezerm.pokepc.R
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
-import com.jezerm.pokepc.ui.components.TextShadow
-import io.github.sceneview.ar.ARScene
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.text.style.TextAlign
-import com.google.ar.core.AugmentedImageDatabase
-import com.jezerm.pokepc.R
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Item
+import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
+import io.github.sceneview.ar.ARScene
 
 @Preview
 @Composable
@@ -172,7 +172,7 @@ fun ARScreen() {
                     database.addImage("wither", witherNode.bitmap, 0.15f)
                     database.addImage("beacon", beaconNode.bitmap, 0.15f)
                     database.addImage("earth", earthNode.bitmap, 0.15f)
-                    config.setAugmentedImageDatabase(database)
+                    config.augmentedImageDatabase = database
                 }
             },
             onSessionCreate = { session ->
@@ -188,7 +188,11 @@ fun ARScreen() {
                 }
             },
         )
-        ConstraintLayout(constraints, modifier = Modifier.fillMaxSize().displayCutoutPadding()) {
+        ConstraintLayout(
+            constraints, modifier = Modifier
+                .fillMaxSize()
+                .displayCutoutPadding()
+        ) {
 
             val hotbarItems = ArrayList<Pair<Item, Int>>()
 
@@ -196,7 +200,7 @@ fun ARScreen() {
                 val (item, pos) = currentHotbar.find { v -> v.second == i } ?: Pair(Item.AIR, i)
                 hotbarItems.add(item to pos)
             }
-            
+
             Surface(modifier = Modifier.layoutId("inventoryBox")) {
                 Card(
                     modifier = Modifier
@@ -211,7 +215,10 @@ fun ARScreen() {
                                 .widthIn(130.dp, 260.dp)
                                 .heightIn(80.dp, 76.dp),
                             columns = GridCells.Fixed(4),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                6.dp,
+                                Alignment.CenterHorizontally
+                            ),
                             verticalArrangement = Arrangement.Center,
                             userScrollEnabled = false
                         ) {

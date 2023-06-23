@@ -17,14 +17,15 @@ val Typography = Typography(
     defaultFontFamily = unifont,
     body1 = TextStyle(
         fontWeight = FontWeight.W500,
-        fontSize = 16.sp
+        fontSize = 16.sp,
+        lineHeight = 18.sp
     ),
     button = TextStyle(
         fontWeight = FontWeight.Black,
         fontSize = 16.sp
     ),
     h1 = TextStyle(
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Black,
         fontSize = 52.sp,
     ),
     h2 = TextStyle(
