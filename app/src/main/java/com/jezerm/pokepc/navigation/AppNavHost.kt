@@ -29,7 +29,10 @@ fun AppNavHost(
             DebugView(navController)
         }
         composable("poke") {
-            ARScreen()
+            ARScreen(navController)
+        }
+        composable("credits") {
+            Credits()
         }
     }
 }
