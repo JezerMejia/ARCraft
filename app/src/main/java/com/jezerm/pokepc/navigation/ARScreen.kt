@@ -40,30 +40,37 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.ar.core.AugmentedImageDatabase
 import com.jezerm.pokepc.R
+import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
+import io.github.sceneview.ar.ARScene
+import com.google.ar.core.Config
+import com.gorisse.thomas.lifecycle.lifecycleScope
 import com.jezerm.pokepc.dialog.ItemInfoDialog
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.entities.ItemInfo
 import com.jezerm.pokepc.ui.components.TextShadow
+import com.jezerm.pokepc.ui.components.TimeBox
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
 import io.github.sceneview.ar.ARScene
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.jezerm.pokepc.R
 
 @Preview
 @Composable
-fun ARScreen() {
+fun ARScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -183,18 +190,19 @@ fun ARScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         ARScene(
             modifier = Modifier.fillMaxSize(),
-            planeRenderer = true,
+            planeRenderer = false,
             onCreate = { arSceneView ->
-                val chestNode = CreateNode("chest", context)
-                val enderChestNode = CreateNode("ender_chest", context)
-                val xmasChestNode = CreateNode("xmas_chest", context)
-                val craftingTableNode = CreateNode("crafting_table", context)
-                val furnaceNode = CreateNode("furnace", context)
-                val cowNode = CreateNode("cow", context)
-                val chickenNode = CreateNode("chicken", context)
-                val witherNode = CreateNode("wither", context)
-                val beaconNode = CreateNode("beacon", context)
-                val earthNode = CreateNode("earth", context)
+                val scope = arSceneView.lifecycleScope
+                val chestNode = CreateNode("chest", context, scope)
+                val enderChestNode = CreateNode("ender_chest", context, scope)
+                val xmasChestNode = CreateNode("xmas_chest", context, scope)
+                val craftingTableNode = CreateNode("crafting_table", context, scope)
+                val furnaceNode = CreateNode("furnace", context, scope)
+                val cowNode = CreateNode("cow", context, scope)
+                val chickenNode = CreateNode("chicken", context, scope)
+                val witherNode = CreateNode("wither", context, scope)
+                val beaconNode = CreateNode("beacon", context, scope)
+                val earthNode = CreateNode("earth", context, scope)
 
                 craftingTableNode.onTap = { motionEvent, renderable ->
                     showCraftingDialog.value = true
@@ -217,12 +225,20 @@ fun ARScreen() {
                 furnaceNode.onTap = { motionEvent, renderable ->
                     showSmeltingDialog.value = true
                 }
+                beaconNode.onTap = { motionEvent, renderable ->
+                     if(inventory.hasItem(Item.BEACON) && inventory.hasItem(Item.CAKE)){
+                        navController.navigate("credits")
+                     } else {
+                        Toast.makeText(context, "Vuelve cuando consigas el Beacon y el Pastel", Toast.LENGTH_LONG).show()
+                     }
+                }
 
                 chickenNode.onTap = { motionEvent, renderable ->
                     MediaPlayer.create(context, R.raw.chicken).start()
                     newItemMP.start()
 
                     lastNewItem.value = ItemInfo.GOT_NEW_EGG
+                  
                     inventory.addItem(lastNewItem.value.item)
                     scope.launch(Dispatchers.IO) {
                         inventory.saveToDatabase()
@@ -230,6 +246,8 @@ fun ARScreen() {
                     showNewItemDialog.value = true
                 }
                 cowNode.onTap = { motionEvent, renderable ->
+                    lastNewItem.value = ItemInfo.BEACON
+                    inventory.addItem(lastNewItem.value.item)
                     if (latestSelectedItem?.item == Item.BUCKET) {
                         MediaPlayer.create(context, R.raw.cow).start()
                         MediaPlayer.create(context, R.raw.cow_milk).start()
@@ -295,6 +313,7 @@ fun ARScreen() {
                     database.addImage("beacon", beaconNode.bitmap, 0.15f)
                     database.addImage("earth", earthNode.bitmap, 0.15f)
                     config.augmentedImageDatabase = database
+                    config.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                 }
             },
             onSessionCreate = { session ->
@@ -305,9 +324,6 @@ fun ARScreen() {
             },
             onTap = { hitResult ->
                 // User tapped in the AR view
-                this.configureSession { arSession, config ->
-                    Log.d("SceneView", config.augmentedImageDatabase.numImages.toString())
-                }
             },
         )
         ConstraintLayout(
@@ -418,37 +434,7 @@ fun ARScreen() {
                     }
                 }
             }
-
-            Surface(modifier = Modifier.layoutId("timerBox")) {
-                Card(
-                    modifier = Modifier
-                        .clip(RectangleShape)
-                        .outsetBorder(lightSize = 8.dp, darkSize = 10.dp, borderPadding = 0.dp),
-                    shape = RectangleShape,
-                    backgroundColor = grayColor
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .background(Color(143, 143, 143))
-                            .padding(24.dp, 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        TextShadow(
-                            modifier = Modifier,
-                            text = "Tiempo Restante",
-                            MaterialTheme.typography.h3,
-                            TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextShadow(
-                            modifier = Modifier,
-                            text = "XX:XX",
-                            MaterialTheme.typography.h3,
-                            TextAlign.Center
-                        )
-                    }
-                }
-            }
+            TimeBox()
         }
     }
 }

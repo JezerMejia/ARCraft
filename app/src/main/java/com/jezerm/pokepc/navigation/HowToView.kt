@@ -172,7 +172,9 @@ fun HowToView(controller: NavHostController) {
                     )
                     TextShadow(
                         text = "Busca un cofre, apúntalo con la cámara y toca el modelo 3D del " +
-                                "cofre para abrirlo. Dentro encontrarás varios ingredientes."
+                                "cofre para abrirlo. Dentro encontrarás varios ingredientes. " +
+                                "Puedes hacer click sobre cualquier item y seleccionar cualquier " +
+                                "espacio vacío para moverlo a esa posición."
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -194,6 +196,64 @@ fun HowToView(controller: NavHostController) {
                             contentDescription = "Interfaz del cofre"
                         )
                     }
+                    TextShadow(
+                        text = "Cómo craftear",
+                        style = MaterialTheme.typography.h4,
+                    )
+                    TextShadow(
+                        text = "Busca una mesa de crafteo, apúntala con la cámara y toca el modelo " +
+                                "3D para abrir su interfaz. Dentro podrás mover los ingredientes de tu " +
+                                "inventario hacia la mesa y viceversa."
+                    )
+                    TextShadow(
+                        text = "Una vez que hayas terminado de poner los ingredientes. Haz click " +
+                                "en el botón de \"Craftear\" para completar la receta."
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_craft,
+                            contentDescription = "Colocando los ingredientes en la mesa de crafteo"
+                        )
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_craft_complete,
+                            contentDescription = "La espada de diamante ha sido crafteada y se encuentra en el inventario"
+                        )
+                    }
+                    TextShadow(
+                        text = "Mira la lista de recetas para saber dónde poner cada ingrediente.",
+                    )
+                    TextShadow(
+                        text = "Cómo hornear",
+                        style = MaterialTheme.typography.h4,
+                    )
+                    TextShadow(
+                        text = "Busca un horno y abre su interfaz. Una vez dentro podrás colocar un " +
+                                "ingrediente a quemar."
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_furnace,
+                            contentDescription = "Colocando un mineral de hierro en el horno"
+                        )
+                        ImageWithDialog(
+                            modifier = Modifier.weight(1f),
+                            resource = R.drawable.screenshot_furnace_complete,
+                            contentDescription = "El mineral ha sido quemado y se produjo un lingote de hierro"
+                        )
+                    }
+                    TextShadow(
+                        text = "Mira la lista de recetas para saber qué puedes quemar.",
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
                 BorderedButton(
                     modifier = Modifier.offset(8.dp, 8.dp),
