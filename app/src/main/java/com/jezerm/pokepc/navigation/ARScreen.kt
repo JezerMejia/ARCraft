@@ -1,6 +1,7 @@
 package com.jezerm.pokepc.navigation
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,8 +13,14 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,29 +33,40 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.ar.core.AugmentedImageDatabase
+import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.R
+import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
+import com.jezerm.pokepc.dialog.ItemInfoDialog
 import com.jezerm.pokepc.entities.Chest
+import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.entities.Item
+import com.jezerm.pokepc.entities.ItemInfo
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
 import io.github.sceneview.ar.ARScene
+import io.github.sceneview.light.position
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
 fun ARScreen() {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val grayColor = Color(198, 198, 198)
@@ -60,32 +78,75 @@ fun ARScreen() {
     val showChestDialog = remember { mutableStateOf(false) }
     val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
 
-    var currentHotbar = ArrayList<Pair<Item, Int>>()
-    val latestSelectedItemPos = remember { mutableStateOf(-1) }
+    val showNewItemDialog = remember { mutableStateOf(false) }
+    val lastNewItem = remember { mutableStateOf(ItemInfo.BEACON) }
+
+    var latestSelectedItem by remember { mutableStateOf(Item.STICK) }
+
+    var updateCounter by remember { mutableStateOf(0) }
+    val inventory by remember { mutableStateOf(Inventory()) }
+    val inventoryItems = remember { mutableStateListOf<ItemDto>() }
+
+    LaunchedEffect(updateCounter) {
+        scope.launch(Dispatchers.IO) {
+            inventory.initFromDatabase()
+
+            val list = arrayListOf<ItemDto>()
+            for (i in (inventory.size - 3)..inventory.size) {
+                val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
+                    Item.AIR,
+                    0,
+                    i,
+                    inventory.getId()
+                )
+                list.add(item)
+            }
+            inventoryItems.clear()
+            inventoryItems.addAll(list)
+        }
+    }
+
+    DisposableEffect(rememberSystemUiController()) {
+        for (i in (inventory.size - 3)..inventory.size) {
+            inventoryItems.add(ItemDto(Item.AIR, 0, i, inventory.getId()))
+        }
+        scope.launch(Dispatchers.IO) {
+            inventory.initFromDatabase()
+        }
+        onDispose { }
+    }
 
     if (showInventoryDialog.value)
-        InventoryDialog(
-            setShowDialog = {
-                showInventoryDialog.value = it
-            }
-        ) {
-            currentHotbar = it
-        }
+        InventoryDialog(setShowDialog = {
+            updateCounter++
+            showInventoryDialog.value = it
+        })
 
     if (showCraftingDialog.value)
         CraftingTableDialog(setShowDialog = {
+            updateCounter++
             showCraftingDialog.value = it
         })
 
     if (showSmeltingDialog.value)
         FurnaceDialog(setShowDialog = {
+            updateCounter++
             showSmeltingDialog.value = it
         })
 
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {
+            updateCounter++
             showChestDialog.value = it
         }, lastChestOpened.value)
+
+    if (showNewItemDialog.value)
+        ItemInfoDialog(
+            setShowDialog = {
+                showNewItemDialog.value = it
+            },
+            lastNewItem.value
+        )
 
     val constraints = ConstraintSet {
         val inventoryBox = createRefFor("inventoryBox")
@@ -149,6 +210,38 @@ fun ARScreen() {
                     showSmeltingDialog.value = true
                 }
 
+                chickenNode.onTap = { motionEvent, renderable ->
+                    lastNewItem.value = ItemInfo.GOT_NEW_EGG
+                    inventory.addItem(lastNewItem.value.item)
+                    scope.launch(Dispatchers.IO) {
+                        inventory.saveToDatabase()
+                    }
+                    showNewItemDialog.value = true
+                }
+                cowNode.onTap = { motionEvent, renderable ->
+                    if (latestSelectedItem == Item.BUCKET) {
+                        lastNewItem.value = ItemInfo.GOT_NEW_MILK_BUCKET
+                        inventory.addItem(lastNewItem.value.item)
+                        inventory.removeItem(Item.BUCKET)
+                        scope.launch(Dispatchers.IO) {
+                            inventory.saveToDatabase()
+                            updateCounter++
+                        }
+                        showNewItemDialog.value = true
+                    }
+                }
+                witherNode.onTap = { motionEvent, renderable ->
+                    if (latestSelectedItem == Item.DIAMOND_SWORD) {
+                        lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
+                        inventory.addItem(lastNewItem.value.item)
+                        scope.launch(Dispatchers.IO) {
+                            inventory.saveToDatabase()
+                            updateCounter++
+                        }
+                        showNewItemDialog.value = true
+                    }
+                }
+
                 arSceneView.addChild(craftingTableNode)
                 arSceneView.addChild(chestNode)
                 arSceneView.addChild(enderChestNode)
@@ -193,14 +286,6 @@ fun ARScreen() {
                 .fillMaxSize()
                 .displayCutoutPadding()
         ) {
-
-            val hotbarItems = ArrayList<Pair<Item, Int>>()
-
-            for (i in 1..4) {
-                val (item, pos) = currentHotbar.find { v -> v.second == i } ?: Pair(Item.AIR, i)
-                hotbarItems.add(item to pos)
-            }
-
             Surface(modifier = Modifier.layoutId("inventoryBox")) {
                 Card(
                     modifier = Modifier
@@ -222,37 +307,52 @@ fun ARScreen() {
                             verticalArrangement = Arrangement.Center,
                             userScrollEnabled = false
                         ) {
-                            items(hotbarItems, key = { c -> c.second }) { (item, position) ->
+                            items(inventoryItems, key = { c -> c.position }) { itemDto ->
+                                val item = itemDto.item
+                                val quantity = itemDto.quantity
+                                val position = itemDto.position
                                 val imageBitmap = ImageBitmap.imageResource(item.image)
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            latestSelectedItemPos.value = position
+                                            latestSelectedItem = item
                                         },
-                                    color = if (latestSelectedItemPos.value == position) Color(
+                                    color = if (latestSelectedItem == item) Color(
                                         94,
                                         94,
                                         94
                                     )
                                     else Color(139, 139, 139)
                                 ) {
-                                    Image(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .wrapContentHeight()
-                                            .clip(RectangleShape)
-                                            .insetBorder(
-                                                lightSize = 4.dp,
-                                                darkSize = 4.dp,
-                                                borderPadding = 0.dp
+                                    BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                                        Image(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .wrapContentHeight()
+                                                .clip(RectangleShape)
+                                                .insetBorder(
+                                                    lightSize = 4.dp,
+                                                    darkSize = 4.dp,
+                                                    borderPadding = 0.dp
+                                                )
+                                                .padding(4.dp),
+                                            bitmap = imageBitmap,
+                                            filterQuality = FilterQuality.None,
+                                            contentDescription = item.value,
+                                            contentScale = ContentScale.FillWidth,
+                                            alignment = Alignment.Center
+                                        )
+                                        if (item != Item.AIR) {
+                                            TextShadow(
+                                                modifier = Modifier.padding(
+                                                    end = 3.dp,
+                                                    bottom = 3.dp
+                                                ),
+                                                text = quantity.toString(),
+                                                fontWeight = FontWeight.Bold
                                             )
-                                            .padding(4.dp),
-                                        bitmap = imageBitmap,
-                                        filterQuality = FilterQuality.None,
-                                        contentDescription = item.value,
-                                        contentScale = ContentScale.FillWidth,
-                                        alignment = Alignment.Center
-                                    )
+                                        }
+                                    }
                                 }
                             }
                         }
