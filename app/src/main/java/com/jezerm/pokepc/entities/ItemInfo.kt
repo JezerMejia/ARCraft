@@ -7,7 +7,7 @@ enum class ItemInfo(val item: Item, val description: String) {
     ),
     OAK_PLANKS(
         Item.OAK_PLANKS,
-        "Útiles para crearte una casa y otros elementos básicos. Lo consigues al poner un tronco de madera en una mesa de crafteo."
+        "Útiles para crearte una casa y otros elementos básicos. Las puedes encontrar en algún cofre."
     ),
     STICK(
         Item.STICK,
@@ -45,9 +45,17 @@ enum class ItemInfo(val item: Item, val description: String) {
         Item.WHEAT,
         "El trigo se consigue plantando. No hay tiempo para eso, así que búscalo en algún cofre."
     ),
+    SAND(
+        Item.SAND,
+        "Sirve para crear vidrio."
+    ),
     GLASS(
         Item.GLASS,
         "El vidrio se consigue quemando arena a unos 1500°C. El horno de por acá llega a tales temperaturas."
+    ),
+    RAW_IRON(
+        Item.RAW_IRON,
+        "Mineral de hierro que se encuentra en múltiples partes de la Tierra."
     ),
     IRON(
         Item.IRON,
