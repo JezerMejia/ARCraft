@@ -1,7 +1,5 @@
 package com.jezerm.pokepc.entities
 
-import com.jezerm.pokepc.data.ItemDto
-
 class CraftingTable : Inventory(9, InventoryType.NO_SAVE) {
 
     fun canCraftRecipe(recipe: Recipe): Boolean {
@@ -9,9 +7,14 @@ class CraftingTable : Inventory(9, InventoryType.NO_SAVE) {
 
         // Get the first position in the crafting table
         val firstItemsPosition = items.sortedBy { v -> v.position }.first().position
+        val firstRecipePosition = recipe.items.sortedBy { v -> v.second }.first().second
 
         for ((item, position) in recipe.items) {
-            val pos = if (!recipe.anyPosition) position else firstItemsPosition + position - 1
+            val pos = if (!recipe.anyPosition) {
+                position
+            } else {
+                firstItemsPosition + position - firstRecipePosition
+            }
             val itemInPosition = items.find { v -> v.position == pos } ?: return false
 
             if (itemInPosition.item != item)
