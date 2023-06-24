@@ -133,13 +133,13 @@ fun ARScreen() {
         CraftingTableDialog(setShowDialog = {
             updateCounter++
             showCraftingDialog.value = it
-        })
+        }, context)
 
     if (showSmeltingDialog.value)
         FurnaceDialog(setShowDialog = {
             updateCounter++
             showSmeltingDialog.value = it
-        })
+        }, context)
 
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {

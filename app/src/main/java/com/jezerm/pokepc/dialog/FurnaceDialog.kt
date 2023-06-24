@@ -1,5 +1,7 @@
 package com.jezerm.pokepc.dialog
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -91,7 +93,7 @@ private fun BoxScope.FurnaceSlot(furnace: Furnace, updater: InventoryUpdater) {
 }
 
 @Composable
-fun FurnaceDialog(setShowDialog: (Boolean) -> Unit) {
+fun FurnaceDialog(setShowDialog: (Boolean) -> Unit, context: Context) {
     val scope = rememberCoroutineScope()
     val grayColor = Color(198, 198, 198)
 
@@ -168,6 +170,7 @@ fun FurnaceDialog(setShowDialog: (Boolean) -> Unit) {
                                     furnace.items.clear()
                                     inventory.addItem(item)
                                     inventoryUpdater.forceUpdate()
+                                    MediaPlayer.create(context, R.raw.button_click).start()
                                 }
                             ) {
                                 TextShadow(
