@@ -1,5 +1,6 @@
 package com.jezerm.pokepc.navigation
 
+import android.media.MediaPlayer
 import android.os.Build
 import android.view.WindowInsetsController
 import androidx.compose.foundation.background
@@ -10,9 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.jezerm.pokepc.R
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
@@ -23,6 +26,7 @@ import com.jezerm.pokepc.ui.components.TextShadow
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DebugView(controller: NavHostController) {
+    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
 
     val systemUiController = rememberSystemUiController()
@@ -41,20 +45,22 @@ fun DebugView(controller: NavHostController) {
 
     var lastChestOpened by remember { mutableStateOf(Chest.ChestType.ONE) }
 
+    val openChestMP = MediaPlayer.create(context, R.raw.chest_open)
+
     if (showChestDialog)
         ChestInventoryDialog(setShowDialog = {
             showChestDialog = it
-        }, lastChestOpened)
+        }, lastChestOpened, context)
 
     if (showCraftingDialog)
         CraftingTableDialog(setShowDialog = {
             showCraftingDialog = it
-        })
+        }, context)
 
     if (showFurnaceDialog)
         FurnaceDialog(setShowDialog = {
             showFurnaceDialog = it
-        })
+        }, context)
 
     Scaffold(
         modifier = Modifier
@@ -81,6 +87,7 @@ fun DebugView(controller: NavHostController) {
                 BorderedButton(
                     onClick = {
                         lastChestOpened = Chest.ChestType.ONE
+                        openChestMP.start()
                         showChestDialog = true
                     }
                 ) {
@@ -89,6 +96,7 @@ fun DebugView(controller: NavHostController) {
                 BorderedButton(
                     onClick = {
                         lastChestOpened = Chest.ChestType.TWO
+                        openChestMP.start()
                         showChestDialog = true
                     }
                 ) {
@@ -97,6 +105,7 @@ fun DebugView(controller: NavHostController) {
                 BorderedButton(
                     onClick = {
                         lastChestOpened = Chest.ChestType.THREE
+                        openChestMP.start()
                         showChestDialog = true
                     }
                 ) {

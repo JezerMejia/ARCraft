@@ -1,5 +1,7 @@
 package com.jezerm.pokepc.dialog
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -122,7 +124,7 @@ private fun CraftingGrid(craftingTable: CraftingTable, updater: InventoryUpdater
 }
 
 @Composable
-fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
+fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit, context: Context) {
     val scope = rememberCoroutineScope()
     val grayColor = Color(198, 198, 198)
 
@@ -208,6 +210,7 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                                     craftingTable.items.clear()
                                     inventory.addItem(item, quantity)
                                     inventoryUpdater.forceUpdate()
+                                    MediaPlayer.create(context, R.raw.button_click).start()
                                 }
                             ) {
                                 TextShadow(

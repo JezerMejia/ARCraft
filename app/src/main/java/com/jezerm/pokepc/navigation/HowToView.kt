@@ -1,5 +1,6 @@
 package com.jezerm.pokepc.navigation
 
+import android.media.MediaPlayer
 import android.os.Build
 import android.view.WindowInsetsController
 import androidx.compose.foundation.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -86,6 +88,8 @@ fun ImageWithDialog(
 
 @Composable
 fun HowToView(controller: NavHostController) {
+    val context = LocalContext.current
+
     val scaffoldState = rememberScaffoldState()
     val scrollState = rememberForeverScrollState("howto")
 
@@ -254,6 +258,7 @@ fun HowToView(controller: NavHostController) {
                 BorderedButton(
                     modifier = Modifier.offset(8.dp, 8.dp),
                     onClick = {
+                        MediaPlayer.create(context, R.raw.button_click).start()
                         controller.popBackStack()
                     }
                 ) {

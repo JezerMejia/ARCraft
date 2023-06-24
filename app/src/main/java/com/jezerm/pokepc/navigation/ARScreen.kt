@@ -1,7 +1,7 @@
 package com.jezerm.pokepc.navigation
 
+import android.media.MediaPlayer
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +43,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.ar.core.AugmentedImageDatabase
+import com.jezerm.pokepc.R
 import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
@@ -62,6 +63,7 @@ import com.jezerm.pokepc.ui.components.TimeBox
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
+import io.github.sceneview.ar.ARScene
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.jezerm.pokepc.R
@@ -74,6 +76,11 @@ fun ARScreen(navController: NavController) {
 
     val grayColor = Color(198, 198, 198)
 
+    val buttonClickedMP = MediaPlayer.create(context, R.raw.button_click)
+    val newItemMP = MediaPlayer.create(context, R.raw.new_item)
+    val newItemBigMP = MediaPlayer.create(context, R.raw.new_item_big)
+    val openChestMP = MediaPlayer.create(context, R.raw.chest_open)
+
     val showInventoryDialog = remember { mutableStateOf(false) }
     val showCraftingDialog = remember { mutableStateOf(false) }
     val showSmeltingDialog = remember { mutableStateOf(false) }
@@ -85,6 +92,8 @@ fun ARScreen(navController: NavController) {
     val lastNewItem = remember { mutableStateOf(ItemInfo.BEACON) }
 
     var latestSelectedItem by remember { mutableStateOf<ItemDto?>(null) }
+
+    var witherHeartPoints by remember { mutableStateOf(5) }
 
     var updateCounter by remember { mutableStateOf(0) }
     val inventory by remember { mutableStateOf(Inventory()) }
@@ -129,19 +138,19 @@ fun ARScreen(navController: NavController) {
         CraftingTableDialog(setShowDialog = {
             updateCounter++
             showCraftingDialog.value = it
-        })
+        }, context)
 
     if (showSmeltingDialog.value)
         FurnaceDialog(setShowDialog = {
             updateCounter++
             showSmeltingDialog.value = it
-        })
+        }, context)
 
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {
             updateCounter++
             showChestDialog.value = it
-        }, lastChestOpened.value)
+        }, lastChestOpened.value, context)
 
     if (showNewItemDialog.value)
         ItemInfoDialog(
@@ -200,14 +209,17 @@ fun ARScreen(navController: NavController) {
                 }
                 chestNode.onTap = { motionEvent, renderable ->
                     lastChestOpened.value = Chest.ChestType.ONE
+                    openChestMP.start()
                     showChestDialog.value = true
                 }
                 enderChestNode.onTap = { motionEvent, renderable ->
                     lastChestOpened.value = Chest.ChestType.TWO
+                    openChestMP.start()
                     showChestDialog.value = true
                 }
                 xmasChestNode.onTap = { motionEvent, renderable ->
                     lastChestOpened.value = Chest.ChestType.THREE
+                    openChestMP.start()
                     showChestDialog.value = true
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
@@ -222,7 +234,11 @@ fun ARScreen(navController: NavController) {
                 }
 
                 chickenNode.onTap = { motionEvent, renderable ->
-                    lastNewItem.value = ItemInfo.CAKE
+                    MediaPlayer.create(context, R.raw.chicken).start()
+                    newItemMP.start()
+
+                    lastNewItem.value = ItemInfo.GOT_NEW_EGG
+                  
                     inventory.addItem(lastNewItem.value.item)
                     scope.launch(Dispatchers.IO) {
                         inventory.saveToDatabase()
@@ -233,6 +249,10 @@ fun ARScreen(navController: NavController) {
                     lastNewItem.value = ItemInfo.BEACON
                     inventory.addItem(lastNewItem.value.item)
                     if (latestSelectedItem?.item == Item.BUCKET) {
+                        MediaPlayer.create(context, R.raw.cow).start()
+                        MediaPlayer.create(context, R.raw.cow_milk).start()
+                        newItemMP.start()
+
                         lastNewItem.value = ItemInfo.GOT_NEW_MILK_BUCKET
                         inventory.addItem(lastNewItem.value.item)
                         inventory.removeItem(latestSelectedItem!!.position)
@@ -245,13 +265,27 @@ fun ARScreen(navController: NavController) {
                 }
                 witherNode.onTap = { motionEvent, renderable ->
                     if (latestSelectedItem?.item == Item.DIAMOND_SWORD) {
-                        lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
-                        inventory.addItem(lastNewItem.value.item)
-                        scope.launch(Dispatchers.IO) {
-                            inventory.saveToDatabase()
-                            updateCounter++
+                        if (witherHeartPoints > 0) {
+                            //play wither hit sound
+                            when (witherHeartPoints) {
+                                5 -> MediaPlayer.create(context, R.raw.wither_hit_1).start()
+                                4 -> MediaPlayer.create(context, R.raw.wither_hit_2).start()
+                                3 -> MediaPlayer.create(context, R.raw.wither_hit_3).start()
+                                2 -> MediaPlayer.create(context, R.raw.wither_hit_4).start()
+                                1 -> MediaPlayer.create(context, R.raw.wither_hit_1).start()
+                            }
+                            witherHeartPoints--
+                        } else if (witherHeartPoints == 0) {
+                            MediaPlayer.create(context, R.raw.wither_death).start()
+                            newItemBigMP.start()
+                            lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
+                            inventory.addItem(lastNewItem.value.item)
+                            scope.launch(Dispatchers.IO) {
+                                inventory.saveToDatabase()
+                                updateCounter++
+                            }
+                            showNewItemDialog.value = true
                         }
-                        showNewItemDialog.value = true
                     }
                 }
 
@@ -385,6 +419,7 @@ fun ARScreen(navController: NavController) {
                             .background(Color.Gray)
                             .clickable {
                                 // onClick
+                                buttonClickedMP.start()
                                 showInventoryDialog.value = true
                             }
                     ) {
