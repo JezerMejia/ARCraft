@@ -81,7 +81,7 @@ fun ARScreen() {
     val showNewItemDialog = remember { mutableStateOf(false) }
     val lastNewItem = remember { mutableStateOf(ItemInfo.BEACON) }
 
-    var latestSelectedItem by remember { mutableStateOf(Item.STICK) }
+    var latestSelectedItem by remember { mutableStateOf<ItemDto?>(null) }
 
     var updateCounter by remember { mutableStateOf(0) }
     val inventory by remember { mutableStateOf(Inventory()) }
@@ -219,10 +219,10 @@ fun ARScreen() {
                     showNewItemDialog.value = true
                 }
                 cowNode.onTap = { motionEvent, renderable ->
-                    if (latestSelectedItem == Item.BUCKET) {
+                    if (latestSelectedItem?.item == Item.BUCKET) {
                         lastNewItem.value = ItemInfo.GOT_NEW_MILK_BUCKET
                         inventory.addItem(lastNewItem.value.item)
-                        inventory.removeItem(Item.BUCKET)
+                        inventory.removeItem(latestSelectedItem!!.position)
                         scope.launch(Dispatchers.IO) {
                             inventory.saveToDatabase()
                             updateCounter++
@@ -231,7 +231,7 @@ fun ARScreen() {
                     }
                 }
                 witherNode.onTap = { motionEvent, renderable ->
-                    if (latestSelectedItem == Item.DIAMOND_SWORD) {
+                    if (latestSelectedItem?.item == Item.DIAMOND_SWORD) {
                         lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
                         inventory.addItem(lastNewItem.value.item)
                         scope.launch(Dispatchers.IO) {
@@ -315,9 +315,9 @@ fun ARScreen() {
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            latestSelectedItem = item
+                                            latestSelectedItem = itemDto
                                         },
-                                    color = if (latestSelectedItem == item) Color(
+                                    color = if (latestSelectedItem == itemDto) Color(
                                         94,
                                         94,
                                         94
