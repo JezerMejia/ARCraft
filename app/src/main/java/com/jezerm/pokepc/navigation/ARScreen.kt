@@ -222,7 +222,7 @@ fun ARScreen(navController: NavController) {
                 }
 
                 chickenNode.onTap = { motionEvent, renderable ->
-                    lastNewItem.value = ItemInfo.GOT_NEW_EGG
+                    lastNewItem.value = ItemInfo.CAKE
                     inventory.addItem(lastNewItem.value.item)
                     scope.launch(Dispatchers.IO) {
                         inventory.saveToDatabase()
@@ -230,6 +230,8 @@ fun ARScreen(navController: NavController) {
                     showNewItemDialog.value = true
                 }
                 cowNode.onTap = { motionEvent, renderable ->
+                    lastNewItem.value = ItemInfo.BEACON
+                    inventory.addItem(lastNewItem.value.item)
                     if (latestSelectedItem?.item == Item.BUCKET) {
                         lastNewItem.value = ItemInfo.GOT_NEW_MILK_BUCKET
                         inventory.addItem(lastNewItem.value.item)
