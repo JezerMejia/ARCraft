@@ -18,13 +18,13 @@ fun TextShadow(
     text: String = "",
     style: TextStyle = MaterialTheme.typography.body1,
     textAlign: TextAlign = TextAlign.Start,
-    fontWeight: FontWeight = FontWeight.Normal
+    fontWeight: FontWeight? = null
 ) {
     BoxWithConstraints {
         Text(
             text,
             color = Color(50, 50, 50),
-            modifier = modifier.absoluteOffset(1.5.dp, 1.4.dp),
+            modifier = modifier.absoluteOffset(1.4.dp, 1.4.dp),
             textAlign = textAlign,
             fontWeight = fontWeight,
             style = style

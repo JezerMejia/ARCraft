@@ -1,20 +1,30 @@
 package com.jezerm.pokepc.entities
 
-enum class Recipe(val items: Array<Pair<Item, Int>>, val result: Item, val anyPosition: Boolean = false) {
+enum class Recipe(val items: Array<Pair<Item, Int>>, val result: Item, val quantity: Int = 1, val anyPosition: Boolean = false) {
     // Basic recipes
+    OAK_PLANKS(
+        arrayOf(
+            Item.OAK_LOG to 5,
+        ),
+        Item.OAK_PLANKS,
+        4,
+        true
+    ),
     STICK(
         arrayOf(
-            Item.WOOD to 1,
-            Item.WOOD to 4,
+            Item.OAK_PLANKS to 2,
+            Item.OAK_PLANKS to 5,
         ),
         Item.STICK,
+        4,
         true
     ),
     SUGAR(
         arrayOf(
-            Item.SUGAR_CANE to 1,
+            Item.SUGAR_CANE to 5,
         ),
         Item.SUGAR,
+        1,
         true
     ),
     BUCKET(
@@ -24,6 +34,7 @@ enum class Recipe(val items: Array<Pair<Item, Int>>, val result: Item, val anyPo
             Item.IRON to 5,
         ),
         Item.BUCKET,
+        1,
         true
     ),
     IRON_PICKAXE(
@@ -42,7 +53,9 @@ enum class Recipe(val items: Array<Pair<Item, Int>>, val result: Item, val anyPo
             Item.DIAMOND to 5,
             Item.STICK to 8,
         ),
-        Item.DIAMOND_SWORD
+        Item.DIAMOND_SWORD,
+        1,
+        true
     ),
 
     // End recipes

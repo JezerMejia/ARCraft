@@ -1,7 +1,6 @@
 package com.jezerm.pokepc.navigation
 
 import androidx.compose.foundation.Image
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,9 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -33,11 +35,7 @@ import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
-import com.jezerm.pokepc.ui.components.TextShadow
 import io.github.sceneview.ar.ARScene
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
-import androidx.compose.ui.text.style.TextAlign
 import com.google.ar.core.AugmentedImageDatabase
 import com.google.ar.core.Config
 import com.gorisse.thomas.lifecycle.lifecycleScope
@@ -61,10 +59,10 @@ fun ARScreen() {
     val showSmeltingDialog = remember { mutableStateOf(false) }
 
     val showChestDialog = remember { mutableStateOf(false) }
-    val lastChestOpened = remember { mutableStateOf(0) }
+    val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
 
     var currentHotbar = ArrayList<Pair<Item, Int>>()
-    val latestSelectedItem = remember { mutableStateOf(-1) }
+    val latestSelectedItemPos = remember { mutableStateOf(-1) }
 
     if (showInventoryDialog.value)
         InventoryDialog(
@@ -138,15 +136,15 @@ fun ARScreen() {
                     showCraftingDialog.value = true
                 }
                 chestNode.onTap = { motionEvent, renderable ->
-                    lastChestOpened.value = Chest.ChestType.ONE.value
+                    lastChestOpened.value = Chest.ChestType.ONE
                     showChestDialog.value = true
                 }
                 enderChestNode.onTap = { motionEvent, renderable ->
-                    lastChestOpened.value = Chest.ChestType.TWO.value
+                    lastChestOpened.value = Chest.ChestType.TWO
                     showChestDialog.value = true
                 }
                 xmasChestNode.onTap = { motionEvent, renderable ->
-                    lastChestOpened.value = Chest.ChestType.THREE.value
+                    lastChestOpened.value = Chest.ChestType.THREE
                     showChestDialog.value = true
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
@@ -190,7 +188,11 @@ fun ARScreen() {
                 // User tapped in the AR view
             },
         )
-        ConstraintLayout(constraints, modifier = Modifier.fillMaxSize().displayCutoutPadding()) {
+        ConstraintLayout(
+            constraints, modifier = Modifier
+                .fillMaxSize()
+                .displayCutoutPadding()
+        ) {
 
             val hotbarItems = ArrayList<Pair<Item, Int>>()
 
@@ -198,7 +200,7 @@ fun ARScreen() {
                 val (item, pos) = currentHotbar.find { v -> v.second == i } ?: Pair(Item.AIR, i)
                 hotbarItems.add(item to pos)
             }
-            
+
             Surface(modifier = Modifier.layoutId("inventoryBox")) {
                 Card(
                     modifier = Modifier
@@ -213,7 +215,10 @@ fun ARScreen() {
                                 .widthIn(130.dp, 260.dp)
                                 .heightIn(80.dp, 76.dp),
                             columns = GridCells.Fixed(4),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                6.dp,
+                                Alignment.CenterHorizontally
+                            ),
                             verticalArrangement = Arrangement.Center,
                             userScrollEnabled = false
                         ) {
@@ -222,9 +227,9 @@ fun ARScreen() {
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            latestSelectedItem.value = position
+                                            latestSelectedItemPos.value = position
                                         },
-                                    color = if (latestSelectedItem.value == position) Color(
+                                    color = if (latestSelectedItemPos.value == position) Color(
                                         94,
                                         94,
                                         94

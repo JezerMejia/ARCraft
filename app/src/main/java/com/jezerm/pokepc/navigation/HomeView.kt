@@ -4,12 +4,13 @@ import android.os.Build
 import android.view.WindowInsetsController
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.jezerm.pokepc.dialog.ItemInfoDialog
 import com.jezerm.pokepc.entities.Item
+import com.jezerm.pokepc.entities.ItemInfo
 import com.jezerm.pokepc.entities.Recipe
 import com.jezerm.pokepc.ui.components.BorderedButton
 import com.jezerm.pokepc.ui.components.TextShadow
@@ -44,6 +47,18 @@ fun RecipeGrid(recipe: Recipe) {
         ingredients.add(item to pos)
     }
 
+    val blueColor = Color(136, 146, 201)
+    val selectedItemInfo = remember { mutableStateOf<ItemInfo?>(null) }
+
+    if (selectedItemInfo.value != null) {
+        ItemInfoDialog(
+            setShowDialog = {
+                selectedItemInfo.value = null
+            },
+            selectedItemInfo.value!!
+        )
+    }
+
     LazyVerticalGrid(
         modifier = Modifier
             .widthIn(100.dp, 164.dp)
@@ -54,16 +69,25 @@ fun RecipeGrid(recipe: Recipe) {
         userScrollEnabled = false
     ) {
         items(ingredients, key = { c -> c.second }) { (item, position) ->
-            val imageBitmap = ImageBitmap.imageResource(item.image)
             Surface(color = Color(139, 139, 139)) {
+                val itemInfo = ItemInfo.valueOf(item)
+                val interactionSource = remember { MutableInteractionSource() }
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .clip(RectangleShape)
                         .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                        .padding(4.dp),
-                    bitmap = imageBitmap,
+                        .padding(4.dp)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = rememberRipple(bounded = true, color = blueColor),
+                            enabled = itemInfo != null,
+                            onClick = {
+                                selectedItemInfo.value = itemInfo!!
+                            }
+                        ),
+                    bitmap = ImageBitmap.imageResource(item.image),
                     filterQuality = FilterQuality.None,
                     contentDescription = item.value,
                     contentScale = ContentScale.FillWidth,
@@ -77,6 +101,18 @@ fun RecipeGrid(recipe: Recipe) {
 @Composable
 fun RecipeContainer(recipe: Recipe) {
     val grayColor = Color(198, 198, 198)
+
+    val blueColor = Color(136, 146, 201)
+    val selectedItemInfo = remember { mutableStateOf<ItemInfo?>(null) }
+
+    if (selectedItemInfo.value != null) {
+        ItemInfoDialog(
+            setShowDialog = {
+                selectedItemInfo.value = null
+            },
+            selectedItemInfo.value!!
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -92,20 +128,40 @@ fun RecipeContainer(recipe: Recipe) {
         ) {
             RecipeGrid(recipe)
             TextShadow(text = recipe.result.value, fontWeight = FontWeight.Bold)
-            val imageBitmap = ImageBitmap.imageResource(recipe.result.image)
+
+            val itemInfo = ItemInfo.valueOf(recipe.result)
+            val interactionSource = remember { MutableInteractionSource() }
+
             Surface(color = Color(139, 139, 139)) {
-                Image(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(RectangleShape)
-                        .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                        .padding(6.dp),
-                    bitmap = imageBitmap,
-                    filterQuality = FilterQuality.None,
-                    contentDescription = recipe.result.value,
-                    contentScale = ContentScale.FillWidth,
-                    alignment = Alignment.Center
-                )
+                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                    Image(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(RectangleShape)
+                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                            .padding(6.dp)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = rememberRipple(bounded = true, color = blueColor),
+                                enabled = itemInfo != null,
+                                onClick = {
+                                    selectedItemInfo.value = itemInfo!!
+                                }
+                            ),
+                        bitmap = ImageBitmap.imageResource(recipe.result.image),
+                        filterQuality = FilterQuality.None,
+                        contentDescription = recipe.result.value,
+                        contentScale = ContentScale.FillWidth,
+                        alignment = Alignment.Center
+                    )
+                    if (recipe.result != Item.AIR && recipe.quantity > 1) {
+                        TextShadow(
+                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
+                            text = recipe.quantity.toString(),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
@@ -117,9 +173,11 @@ fun LazyGridScope.RecipeCards() {
         Recipe.BEACON,
     )
     val basicRecipes: List<Recipe> = listOf(
+        Recipe.OAK_PLANKS,
         Recipe.STICK,
+        Recipe.SUGAR,
         Recipe.BUCKET,
-        Recipe.IRON_PICKAXE
+        Recipe.DIAMOND_SWORD
     )
 
     item(span = { GridItemSpan(2) }) {
@@ -231,7 +289,28 @@ fun HomeView(controller: NavHostController) {
                                 controller.navigate("howto")
                             }
                         ) {
-                            TextShadow(text = "¿Cómo se juega?", fontWeight = FontWeight.Bold)
+                            TextShadow(
+                                text = "¿Cómo se juega?",
+                                style = MaterialTheme.typography.button
+                            )
+                        }
+                    }
+
+                    item(span = { GridItemSpan(2) }) {
+                        TextShadow(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "Toca cualquier ingrediente para ver su descripción",
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    item(span = { GridItemSpan(2) }) {
+                        BorderedButton(
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            onClick = {
+                                controller.navigate("debug")
+                            }
+                        ) {
+                            TextShadow(text = "DEBUG", style = MaterialTheme.typography.button)
                         }
                     }
 

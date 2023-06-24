@@ -1,8 +1,10 @@
 package com.jezerm.pokepc.dialog
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,8 +21,11 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,45 +35,57 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @Composable
-private fun InventoryGrid(inventory: ArrayList<ItemDto>) {
+private fun InventoryGrid() {
+    val inventory = Inventory()
 
-    val inventoryItems = ArrayList<Pair<Item, Int>>()
-    val items = ArrayList<Pair<Item, Int>>()
-
-    for (item in inventory) {
-        inventoryItems.add(Pair(item.item, item.position))
-    }
-
-    for (i in 1..20) {
-        val (item, pos) = inventoryItems.find { v -> v.second == i } ?: Pair(Item.AIR, i)
-        items.add(item to pos)
-    }
-
+    val items = remember { mutableStateListOf<ItemDto>() }
     val latestSelectedItem = remember { mutableStateOf(-1) }
+
+    val scope = rememberCoroutineScope()
+    DisposableEffect(rememberSystemUiController()) {
+        scope.launch(Dispatchers.IO) {
+            inventory.initFromDatabase()
+            items.clear()
+            for (i in 1..20) {
+                val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
+                    Item.AIR,
+                    1,
+                    i,
+                    inventory.getId()
+                )
+                Log.d("PlayerInventory", "Position: $i, Item: ${item.item.value}")
+                items.add(item)
+            }
+        }
+        onDispose { }
+    }
 
     LazyVerticalGrid(
         modifier = Modifier
             .widthIn(100.dp, 200.dp)
-            .heightIn(120.dp, 400.dp),
+            .heightIn(280.dp, 400.dp),
         columns = GridCells.Fixed(4),
         userScrollEnabled = false
     ) {
-        items(items, key = { c -> c.second }) { (item, position) ->
+        items(items, key = { c -> c.position }) { itemDto ->
+            val item = itemDto.item
+            val quantity = itemDto.quantity
+            val position = itemDto.position
             val imageBitmap = ImageBitmap.imageResource(item.image)
             Surface(
                 modifier = Modifier
@@ -82,19 +99,28 @@ private fun InventoryGrid(inventory: ArrayList<ItemDto>) {
                 color = if (latestSelectedItem.value == position) Color(94, 94, 94)
                 else Color(139, 139, 139)
             ) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clip(RectangleShape)
-                        .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                        .padding(4.dp),
-                    bitmap = imageBitmap,
-                    filterQuality = FilterQuality.None,
-                    contentDescription = item.value,
-                    contentScale = ContentScale.FillWidth,
-                    alignment = Alignment.Center
-                )
+                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .clip(RectangleShape)
+                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                            .padding(4.dp),
+                        bitmap = imageBitmap,
+                        filterQuality = FilterQuality.None,
+                        contentDescription = item.value,
+                        contentScale = ContentScale.FillWidth,
+                        alignment = Alignment.Center
+                    )
+                    if (item != Item.AIR) {
+                        TextShadow(
+                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
+                            text = quantity.toString(),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }
@@ -106,10 +132,6 @@ fun InventoryDialog(
     setCurrentHotbar: (ArrayList<Pair<Item, Int>>) -> Unit
 ) {
     val grayColor = Color(198, 198, 198)
-
-    val inventory = Inventory()
-
-    initInventory(inventory)
 
     Dialog(
         onDismissRequest = {
@@ -144,17 +166,10 @@ fun InventoryDialog(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        InventoryGrid(inventory.items)
+                        InventoryGrid()
                     }
                 }
             }
         }
-    }
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-private fun initInventory(inventory: Inventory) {
-    GlobalScope.launch(Dispatchers.IO) {
-        inventory.initFromDatabase()
     }
 }
