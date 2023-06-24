@@ -24,6 +24,9 @@ fun AppNavHost(
         composable("howto") {
             HowToView(navController)
         }
+        composable("debug") {
+            DebugView(navController)
+        }
         composable("poke") {
             ARScreen()
         }

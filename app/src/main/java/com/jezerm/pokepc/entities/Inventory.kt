@@ -5,7 +5,7 @@ import com.jezerm.pokepc.data.RoomRepository
 import kotlinx.coroutines.flow.firstOrNull
 
 open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType.PLAYER) {
-    val items: ArrayList<ItemDto> = ArrayList()
+    val items = arrayListOf<ItemDto>()
 
     open fun getId(): Int =
         when (type) {
@@ -26,14 +26,14 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
         val repository = RoomRepository.getInstance()
         val oldItems = repository.getInventory(this).firstOrNull() ?: listOf()
 
-        for (item in items) {
-            if (oldItems.contains(item))
-                repository.update(item)
+        for (new in items) {
+            if (oldItems.any { it.item == new.item })
+                repository.update(new)
             else
-                repository.insert(item)
+                repository.insert(new)
         }
         for (old in oldItems) {
-            if (!items.contains(old))
+            if (!items.any { it.item == old.item })
                 repository.delete(old)
         }
     }
@@ -84,7 +84,11 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
         return true
     }
 
-    fun addItemToPosition(item: Item, quantity: Int = 1, position: Int = findEmptyPosition()): Boolean {
+    fun addItemToPosition(
+        item: Item,
+        quantity: Int = 1,
+        position: Int = findEmptyPosition()
+    ): Boolean {
         var itemDto = items.find { itemDto -> itemDto.item == item && itemDto.position == position }
         if (itemDto != null) return false
 
@@ -116,6 +120,22 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
         if (!this.hasItem(item)) return false
         this.removeItem(item, quantity)
         inventory.addItem(item, quantity)
+        return true
+    }
+
+    fun moveItemToInventory(
+        inventory: Inventory,
+        item: Item,
+        quantity: Int = 1,
+        position: Int = -1
+    ): Boolean {
+        if (!this.hasItem(item)) return false
+        this.removeItem(item, quantity)
+        if (position == -1) {
+            inventory.addItem(item, quantity)
+        } else {
+            inventory.addItemToPosition(item, quantity, position)
+        }
         return true
     }
 

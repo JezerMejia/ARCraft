@@ -3,6 +3,7 @@ package com.jezerm.pokepc.dialog
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,56 +41,108 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.ChestType) {
-
     val scope = rememberCoroutineScope()
 
-    val chest = Chest(chestType)
+    val chest by remember { mutableStateOf(Chest(chestType)) }
     val chestItems = remember { mutableStateListOf<ItemDto>() }
 
-    DisposableEffect(rememberSystemUiController()) {
+    val inventory by remember { mutableStateOf(Inventory()) }
+    val inventoryItems = remember { mutableStateListOf<ItemDto>() }
+
+    var updateCounter by remember { mutableStateOf(0) }
+    var initialSelection by remember { mutableStateOf<ItemDto?>(null) }
+
+    LaunchedEffect(updateCounter) {
+        Log.d("Chest", "Chest was modified: ${chest.items.toList()}")
+
         scope.launch(Dispatchers.IO) {
-            chest.initFromDatabase()
-            chestItems.clear()
-            for (i in 1..8) {
+            val list = arrayListOf<ItemDto>()
+            for (i in 1..chest.size) {
                 val item = chest.items.find { v -> v.position == i } ?: ItemDto(
                     Item.AIR,
                     0,
                     i,
                     chest.getId()
                 )
-                Log.d("Chest", "Position: $i, Item: ${item.item.value}")
-                chestItems.add(item)
+                Log.d("Chest", "Position: $i, Item: ${item.item.value} - ${item.quantity}")
+                list.add(item)
             }
+            chestItems.clear()
+            chestItems.addAll(list)
         }
-        onDispose { }
     }
+    LaunchedEffect(updateCounter) {
+        Log.d("Inventory", "Inventory was modified: ${inventory.items.toList()}")
 
-    val inventory = Inventory()
-    val inventoryItems = remember { mutableStateListOf<ItemDto>() }
-    DisposableEffect(rememberSystemUiController()) {
         scope.launch(Dispatchers.IO) {
-            inventory.initFromDatabase()
-            inventoryItems.clear()
-            for (i in 1..20) {
+            val list = arrayListOf<ItemDto>()
+            for (i in 1..inventory.size) {
                 val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
                     Item.AIR,
-                    1,
+                    0,
                     i,
                     inventory.getId()
                 )
-                Log.d("PlayerInventory", "Position: $i, Item: ${item.item.value}")
-                inventoryItems.add(item)
+                Log.d("Inventory", "Position: $i, Item: ${item.item.value} - ${item.quantity}")
+                list.add(item)
             }
+            inventoryItems.clear()
+            inventoryItems.addAll(list)
+        }
+    }
+
+    DisposableEffect(rememberSystemUiController()) {
+        for (i in 1..chest.size) {
+            chestItems.add(ItemDto(Item.AIR, 0, i, chest.getId()))
+        }
+        for (i in 1..inventory.size) {
+            inventoryItems.add(ItemDto(Item.AIR, 0, i, inventory.getId()))
+        }
+
+        scope.launch(Dispatchers.IO) {
+            chest.initFromDatabase()
+            inventory.initFromDatabase()
+
         }
         onDispose { }
     }
 
+    fun moveItem(itemDto: ItemDto) {
+        if (initialSelection == null) {
+            initialSelection = if (itemDto.item != Item.AIR) itemDto else null
+            return
+        }
+        val endSelection = itemDto
+        val initSelection = initialSelection!!
+
+        if (initSelection.inventoryId == endSelection.inventoryId) {
+            val inv = if (endSelection.inventoryId == chest.getId()) chest else inventory
+            val result = inv.moveItem(initSelection.item, endSelection.position)
+            Log.d("Chest", "Moved: $result - ${inv.items.toList()}")
+        } else {
+            val initInv = if (initSelection.inventoryId == chest.getId()) chest else inventory
+            val endInv = if (endSelection.inventoryId == chest.getId()) chest else inventory
+            val result = initInv.moveItemToInventory(
+                endInv,
+                initSelection.item,
+                initSelection.quantity,
+                endSelection.position
+            )
+            Log.d("Chest", "Moved: $result)}")
+        }
+
+        updateCounter++
+        initialSelection = null
+    }
+
     val grayColor = Color(198, 198, 198)
+    val blueColor = Color(136, 146, 201)
 
     Dialog(onDismissRequest = {
         scope.launch(Dispatchers.IO) {
             chest.saveToDatabase()
             inventory.saveToDatabase()
+            Log.d("Inventory", "Save data")
         }
         setShowDialog(false)
     }) {
@@ -153,47 +207,25 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                                 val item = itemDto.item
                                 val quantity = itemDto.quantity
                                 val imageBitmap = ImageBitmap.imageResource(item.image)
+                                val interactionSource = remember { MutableInteractionSource() }
                                 Surface(
                                     modifier = Modifier
-                                        .clickable {
-                                            if (chest.moveItemToInventory(
-                                                    inventory = inventory,
-                                                    item = item,
-                                                    quantity = quantity
-                                                )
-                                            ) {
-                                                scope.launch(Dispatchers.IO) {
-                                                    chestItems.clear()
-                                                    for (i in 1..8) {
-                                                        val listItem =
-                                                            chest.items.find { v -> v.position == i }
-                                                                ?: ItemDto(
-                                                                    Item.AIR,
-                                                                    0,
-                                                                    i,
-                                                                    chest.getId()
-                                                                )
-                                                        Log.d(
-                                                            "Chest",
-                                                            "Position: $i, Item: ${listItem.item.value}"
-                                                        )
-                                                        chestItems.add(listItem)
-                                                    }
-                                                    inventoryItems.clear()
-                                                    for (i in 1..20) {
-                                                        val listItem = inventory.items.find { v -> v.position == i } ?: ItemDto(
-                                                            Item.AIR,
-                                                            1,
-                                                            i,
-                                                            inventory.getId()
-                                                        )
-                                                        Log.d("PlayerInventory", "Position: $i, Item: ${listItem.item.value}")
-                                                        inventoryItems.add(listItem)
-                                                    }
-                                                }
+                                        .clickable(
+                                            interactionSource = interactionSource,
+                                            indication = rememberRipple(
+                                                bounded = true,
+                                                color = blueColor
+                                            ),
+                                            onClick = {
+                                                moveItem(itemDto)
                                             }
-                                        },
-                                    color = Color(139, 139, 139)
+                                        ),
+                                    color = if (initialSelection?.item == item) Color(
+                                        94,
+                                        94,
+                                        94
+                                    )
+                                    else Color(139, 139, 139)
                                 ) {
                                     BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
                                         Image(
@@ -263,7 +295,26 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                                 val item = itemDto.item
                                 val quantity = itemDto.quantity
                                 val imageBitmap = ImageBitmap.imageResource(item.image)
-                                Surface(color = Color(139, 139, 139)) {
+                                val interactionSource = remember { MutableInteractionSource() }
+                                Surface(
+                                    modifier = Modifier
+                                        .clickable(
+                                            interactionSource = interactionSource,
+                                            indication = rememberRipple(
+                                                bounded = true,
+                                                color = blueColor
+                                            ),
+                                            onClick = {
+                                                moveItem(itemDto)
+                                            }
+                                        ),
+                                    color = if (initialSelection?.item == item) Color(
+                                        94,
+                                        94,
+                                        94
+                                    )
+                                    else Color(139, 139, 139)
+                                ) {
                                     BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
                                         Image(
                                             modifier = Modifier
