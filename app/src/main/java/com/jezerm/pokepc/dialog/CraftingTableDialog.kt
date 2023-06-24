@@ -39,7 +39,6 @@ import com.jezerm.pokepc.ui.components.BorderedButton
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
-import io.github.sceneview.light.position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -162,11 +161,7 @@ private fun CraftingGrid(craftingTable: CraftingTable, updater: InventoryUpdater
         for (i in 1..craftingTable.size) {
             craftingItems.add(ItemDto(Item.AIR, 0, i, craftingTable.getId()))
         }
-        onDispose {
-            val inventory = updater.playerInventory
-            craftingTable.moveAllItemsToInventory(inventory)
-            Log.d("CraftingTable", "Moved all items to inventory")
-        }
+        onDispose { }
     }
 
     LazyVerticalGrid(
@@ -218,6 +213,7 @@ private fun CraftingGrid(craftingTable: CraftingTable, updater: InventoryUpdater
 
 @Composable
 fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
+    val scope = rememberCoroutineScope()
     val grayColor = Color(198, 198, 198)
 
     val craftingTable by remember { mutableStateOf(CraftingTable()) }
@@ -225,7 +221,16 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
 
     val inventoryUpdater by remember { mutableStateOf(InventoryUpdater(inventory, craftingTable)) }
 
-    Dialog(onDismissRequest = { setShowDialog(false) }) {
+    Dialog(
+        onDismissRequest = {
+            craftingTable.moveAllItemsToInventory(inventory)
+            scope.launch(Dispatchers.IO) {
+                inventory.saveToDatabase()
+                Log.d("Inventory", "Save data")
+            }
+            setShowDialog(false)
+        }
+    ) {
         Surface {
             Card(
                 modifier = Modifier
@@ -288,7 +293,11 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                         ) {
                             BorderedButton(
                                 onClick = {
-
+                                    val (item, quantity) = craftingTable.craftRecipe()
+                                        ?: return@BorderedButton
+                                    craftingTable.items.clear()
+                                    inventory.addItem(item, quantity)
+                                    inventoryUpdater.forceUpdate()
                                 }
                             ) {
                                 TextShadow(

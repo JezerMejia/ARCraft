@@ -8,6 +8,10 @@ class InventoryUpdater(val playerInventory: Inventory, val inventoryTwo: Invento
     val updateCounter = mutableStateOf(0)
     val initialSelection = mutableStateOf<ItemDto?>(null)
 
+    fun forceUpdate() {
+        updateCounter.value++
+    }
+
     fun moveItemFromInventoryToInventory(
         endSelection: ItemDto,
         moveAll: Boolean = true,

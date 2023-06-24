@@ -23,7 +23,7 @@ class CraftingTable : Inventory(9, InventoryType.NO_SAVE) {
         return true
     }
 
-    fun craftRecipe(): Item? {
+    fun craftRecipe(): Pair<Item, Int>? {
         var finalRecipe: Recipe? = null
         for (recipe in Recipe.values()) {
             if (canCraftRecipe(recipe)) {
@@ -31,6 +31,7 @@ class CraftingTable : Inventory(9, InventoryType.NO_SAVE) {
                 break
             }
         }
-        return finalRecipe?.result
+        if (finalRecipe == null) return null
+        return finalRecipe.result to finalRecipe.quantity
     }
 }
