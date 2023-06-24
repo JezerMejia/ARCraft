@@ -1,7 +1,8 @@
 package com.jezerm.pokepc.navigation
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,6 +72,10 @@ fun ARScreen() {
 
     val grayColor = Color(198, 198, 198)
 
+    val buttonClickedMP = MediaPlayer.create(context, R.raw.button_click)
+    val newItemMP = MediaPlayer.create(context, R.raw.new_item)
+    val newItemBigMP = MediaPlayer.create(context, R.raw.new_item_big)
+
     val showInventoryDialog = remember { mutableStateOf(false) }
     val showCraftingDialog = remember { mutableStateOf(false) }
     val showSmeltingDialog = remember { mutableStateOf(false) }
@@ -82,6 +87,8 @@ fun ARScreen() {
     val lastNewItem = remember { mutableStateOf(ItemInfo.BEACON) }
 
     var latestSelectedItem by remember { mutableStateOf<ItemDto?>(null) }
+
+    var witherHeartPoints by remember { mutableStateOf(5) }
 
     var updateCounter by remember { mutableStateOf(0) }
     val inventory by remember { mutableStateOf(Inventory()) }
@@ -211,6 +218,9 @@ fun ARScreen() {
                 }
 
                 chickenNode.onTap = { motionEvent, renderable ->
+                    MediaPlayer.create(context, R.raw.chicken).start()
+                    newItemMP.start()
+
                     lastNewItem.value = ItemInfo.GOT_NEW_EGG
                     inventory.addItem(lastNewItem.value.item)
                     scope.launch(Dispatchers.IO) {
@@ -220,6 +230,10 @@ fun ARScreen() {
                 }
                 cowNode.onTap = { motionEvent, renderable ->
                     if (latestSelectedItem?.item == Item.BUCKET) {
+                        MediaPlayer.create(context, R.raw.cow).start()
+                        MediaPlayer.create(context, R.raw.cow_milk).start()
+                        newItemMP.start()
+
                         lastNewItem.value = ItemInfo.GOT_NEW_MILK_BUCKET
                         inventory.addItem(lastNewItem.value.item)
                         inventory.removeItem(latestSelectedItem!!.position)
@@ -232,13 +246,27 @@ fun ARScreen() {
                 }
                 witherNode.onTap = { motionEvent, renderable ->
                     if (latestSelectedItem?.item == Item.DIAMOND_SWORD) {
-                        lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
-                        inventory.addItem(lastNewItem.value.item)
-                        scope.launch(Dispatchers.IO) {
-                            inventory.saveToDatabase()
-                            updateCounter++
+                        if (witherHeartPoints > 0) {
+                            //play wither hit sound
+                            when (witherHeartPoints) {
+                                5 -> MediaPlayer.create(context, R.raw.wither_hit_1).start()
+                                4 -> MediaPlayer.create(context, R.raw.wither_hit_2).start()
+                                3 -> MediaPlayer.create(context, R.raw.wither_hit_3).start()
+                                2 -> MediaPlayer.create(context, R.raw.wither_hit_4).start()
+                                1 -> MediaPlayer.create(context, R.raw.wither_hit_1).start()
+                            }
+                            witherHeartPoints--
+                        } else if (witherHeartPoints == 0) {
+                            MediaPlayer.create(context, R.raw.wither_death).start()
+                            newItemBigMP.start()
+                            lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
+                            inventory.addItem(lastNewItem.value.item)
+                            scope.launch(Dispatchers.IO) {
+                                inventory.saveToDatabase()
+                                updateCounter++
+                            }
+                            showNewItemDialog.value = true
                         }
-                        showNewItemDialog.value = true
                     }
                 }
 
@@ -374,6 +402,7 @@ fun ARScreen() {
                             .background(Color.Gray)
                             .clickable {
                                 // onClick
+                                buttonClickedMP.start()
                                 showInventoryDialog.value = true
                             }
                     ) {

@@ -23,7 +23,7 @@ enum class ItemInfo(val item: Item, val description: String) {
     ),
     GOT_NEW_MILK_BUCKET(
         Item.MILK_BUCKET,
-        "Ha conseguido 3 cubos con leche! Debe de ser su dia de suerte."
+        "Ha conseguido un cubo con leche!"
     ),
     EGG(
         Item.EGG,
