@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.jezerm.pokepc.R
 import com.jezerm.pokepc.dialog.ItemInfoDialog
+import com.jezerm.pokepc.entities.BurnRecipe
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.entities.ItemInfo
 import com.jezerm.pokepc.entities.Recipe
@@ -39,7 +42,102 @@ import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.ui.theme.PokePCTheme
 
 @Composable
-fun RecipeGrid(recipe: Recipe) {
+private fun BurnRecipeGrid(recipe: BurnRecipe) {
+    val grayColor = Color(198, 198, 198)
+    val blueColor = Color(136, 146, 201)
+
+    var selectedItemInfo by remember { mutableStateOf<ItemInfo?>(null) }
+
+    if (selectedItemInfo != null) {
+        ItemInfoDialog(
+            setShowDialog = {
+                selectedItemInfo = null
+            },
+            selectedItemInfo!!
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .clip(RectangleShape)
+            .outsetBorder(lightSize = 8.dp, darkSize = 10.dp, borderPadding = 0.dp),
+        shape = RectangleShape,
+        backgroundColor = grayColor
+    ) {
+        Column(
+            Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val itemInfo = ItemInfo.valueOf(recipe.item)
+            val itemInteractionSource = remember { MutableInteractionSource() }
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.furnace_front),
+                    contentDescription = "",
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .sizeIn(20.dp, 20.dp, 150.dp, 150.dp)
+                        .aspectRatio(1f)
+                )
+                Surface(color = Color(139, 139, 139)) {
+                    Image(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(RectangleShape)
+                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                            .padding(6.dp)
+                            .clickable(
+                                interactionSource = itemInteractionSource,
+                                indication = rememberRipple(bounded = true, color = blueColor),
+                                enabled = itemInfo != null,
+                                onClick = {
+                                    selectedItemInfo = itemInfo
+                                }
+                            ),
+                        bitmap = ImageBitmap.imageResource(recipe.item.image),
+                        filterQuality = FilterQuality.None,
+                        contentDescription = recipe.item.value,
+                        contentScale = ContentScale.FillWidth,
+                        alignment = Alignment.Center
+                    )
+                }
+            }
+            TextShadow(text = recipe.result.value, fontWeight = FontWeight.Bold)
+
+            val resultInfo = ItemInfo.valueOf(recipe.result)
+            val resultInteractionSource = remember { MutableInteractionSource() }
+            Surface(color = Color(139, 139, 139)) {
+                Image(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RectangleShape)
+                        .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                        .padding(6.dp)
+                        .clickable(
+                            interactionSource = resultInteractionSource,
+                            indication = rememberRipple(bounded = true, color = blueColor),
+                            enabled = resultInfo != null,
+                            onClick = {
+                                selectedItemInfo = resultInfo
+                            }
+                        ),
+                    bitmap = ImageBitmap.imageResource(recipe.result.image),
+                    filterQuality = FilterQuality.None,
+                    contentDescription = recipe.result.value,
+                    contentScale = ContentScale.FillWidth,
+                    alignment = Alignment.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipeGrid(recipe: Recipe) {
     val ingredients = ArrayList<Pair<Item, Int>>()
 
     for (i in 1..9) {
@@ -48,14 +146,14 @@ fun RecipeGrid(recipe: Recipe) {
     }
 
     val blueColor = Color(136, 146, 201)
-    val selectedItemInfo = remember { mutableStateOf<ItemInfo?>(null) }
+    var selectedItemInfo by remember { mutableStateOf<ItemInfo?>(null) }
 
-    if (selectedItemInfo.value != null) {
+    if (selectedItemInfo != null) {
         ItemInfoDialog(
             setShowDialog = {
-                selectedItemInfo.value = null
+                selectedItemInfo = null
             },
-            selectedItemInfo.value!!
+            selectedItemInfo!!
         )
     }
 
@@ -84,7 +182,7 @@ fun RecipeGrid(recipe: Recipe) {
                             indication = rememberRipple(bounded = true, color = blueColor),
                             enabled = itemInfo != null,
                             onClick = {
-                                selectedItemInfo.value = itemInfo!!
+                                selectedItemInfo = itemInfo
                             }
                         ),
                     bitmap = ImageBitmap.imageResource(item.image),
@@ -99,7 +197,7 @@ fun RecipeGrid(recipe: Recipe) {
 }
 
 @Composable
-fun RecipeContainer(recipe: Recipe) {
+private fun RecipeContainer(recipe: Recipe) {
     val grayColor = Color(198, 198, 198)
 
     val blueColor = Color(136, 146, 201)
@@ -173,11 +271,14 @@ fun LazyGridScope.RecipeCards() {
         Recipe.BEACON,
     )
     val basicRecipes: List<Recipe> = listOf(
-        Recipe.OAK_PLANKS,
         Recipe.STICK,
         Recipe.SUGAR,
         Recipe.BUCKET,
         Recipe.DIAMOND_SWORD
+    )
+    val burnRecipes: List<BurnRecipe> = listOf(
+        BurnRecipe.IRON,
+        BurnRecipe.GLASS,
     )
 
     item(span = { GridItemSpan(2) }) {
@@ -201,6 +302,9 @@ fun LazyGridScope.RecipeCards() {
     }
     items(basicRecipes, key = { c -> c.result }) { recipe ->
         RecipeContainer(recipe)
+    }
+    items(burnRecipes, key = { c -> c.result }) { recipe ->
+        BurnRecipeGrid(recipe)
     }
 }
 
