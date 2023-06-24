@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -41,6 +44,7 @@ import com.gorisse.thomas.lifecycle.lifecycleScope
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Item
+import com.jezerm.pokepc.ui.components.TimeBox
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
@@ -119,7 +123,6 @@ fun ARScreen() {
             planeRenderer = false,
             onCreate = { arSceneView ->
                 val scope = arSceneView.lifecycleScope
-                Log.d("SceneView1", "size: ${arSceneView.children.size}")
                 val chestNode = CreateNode("chest", context, scope)
                 val enderChestNode = CreateNode("ender_chest", context, scope)
                 val xmasChestNode = CreateNode("xmas_chest", context, scope)
@@ -173,7 +176,8 @@ fun ARScreen() {
                     database.addImage("wither", witherNode.bitmap, 0.15f)
                     database.addImage("beacon", beaconNode.bitmap, 0.15f)
                     database.addImage("earth", earthNode.bitmap, 0.15f)
-                    config.setAugmentedImageDatabase(database)
+                    config.augmentedImageDatabase = database
+                    config.lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
                 }
             },
             onSessionCreate = { session ->
@@ -184,9 +188,6 @@ fun ARScreen() {
             },
             onTap = { hitResult ->
                 // User tapped in the AR view
-                this.configureSession { arSession, config ->
-                    Log.d("SceneView", config.augmentedImageDatabase.numImages.toString())
-                }
             },
         )
         ConstraintLayout(constraints, modifier = Modifier.fillMaxSize().displayCutoutPadding()) {
@@ -282,37 +283,7 @@ fun ARScreen() {
                     }
                 }
             }
-
-            Surface(modifier = Modifier.layoutId("timerBox")) {
-                Card(
-                    modifier = Modifier
-                        .clip(RectangleShape)
-                        .outsetBorder(lightSize = 8.dp, darkSize = 10.dp, borderPadding = 0.dp),
-                    shape = RectangleShape,
-                    backgroundColor = grayColor
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .background(Color(143, 143, 143))
-                            .padding(24.dp, 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        TextShadow(
-                            modifier = Modifier,
-                            text = "Tiempo Restante",
-                            MaterialTheme.typography.h3,
-                            TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        TextShadow(
-                            modifier = Modifier,
-                            text = "XX:XX",
-                            MaterialTheme.typography.h3,
-                            TextAlign.Center
-                        )
-                    }
-                }
-            }
+            TimeBox()
         }
     }
 }
