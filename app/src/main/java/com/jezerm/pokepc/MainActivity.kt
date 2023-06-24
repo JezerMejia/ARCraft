@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         // Initialize the Room repository based in the ItemDto DAO
-        RoomRepository.init(database.itemDtoDao())
+        RoomRepository.init(database.itemDtoDao(), database.timeDtoDao())
 
         GlobalScope.launch(Dispatchers.IO) {
             database.runInTransaction {}
