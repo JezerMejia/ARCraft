@@ -1,40 +1,20 @@
 package com.jezerm.pokepc.dialog
 
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,39 +31,47 @@ import androidx.compose.ui.window.Dialog
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.data.ItemDto
+import com.jezerm.pokepc.entities.CraftingTable
 import com.jezerm.pokepc.entities.Inventory
+import com.jezerm.pokepc.entities.InventoryUpdater
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.BorderedButton
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
-import com.jezerm.pokepc.ui.theme.PixelBorderShape
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 @Composable
-private fun InventoryGrid() {
-    val inventory = Inventory()
-
-    val items = remember { mutableStateListOf<ItemDto>() }
-    val latestSelectedItem = remember { mutableStateOf(-1) }
-
+private fun InventoryGrid(inventory: Inventory, updater: InventoryUpdater) {
     val scope = rememberCoroutineScope()
+    val blueColor = Color(136, 146, 201)
+
+    val inventoryItems = remember { mutableStateListOf<ItemDto>() }
+
+    LaunchedEffect(updater.updateCounter.value) {
+        Log.d("Inventory", "Inventory was modified: ${inventory.items.toList()}")
+
+        val list = mutableStateListOf<ItemDto>()
+        for (i in 1..inventory.size) {
+            val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
+                Item.AIR,
+                0,
+                i,
+                inventory.getId()
+            )
+            Log.d("Inventory", "Position: $i, Item: ${item.item.value} - ${item.quantity}")
+            list.add(item.copy())
+        }
+        inventoryItems.clear()
+        inventoryItems.addAll(list)
+    }
     DisposableEffect(rememberSystemUiController()) {
+        for (i in 1..inventory.size) {
+            inventoryItems.add(ItemDto(Item.AIR, 0, i, inventory.getId()))
+        }
         scope.launch(Dispatchers.IO) {
             inventory.initFromDatabase()
-            items.clear()
-            for (i in 1..20) {
-                val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
-                    Item.AIR,
-                    1,
-                    i,
-                    inventory.getId()
-                )
-                Log.d("PlayerInventory", "Position: $i, Item: ${item.item.value}")
-                items.add(item)
-            }
         }
         onDispose { }
     }
@@ -95,21 +83,25 @@ private fun InventoryGrid() {
         columns = GridCells.Fixed(5),
         userScrollEnabled = false
     ) {
-        items(items, key = { c -> c.position }) { itemDto ->
+        items(inventoryItems, key = { c -> c.position }) { itemDto ->
             val item = itemDto.item
             val quantity = itemDto.quantity
-            val position = itemDto.position
-            val imageBitmap = ImageBitmap.imageResource(item.image)
+            val interactionSource = remember { MutableInteractionSource() }
+            val selected = updater.initialSelection.value
+            val isSelected = selected == itemDto
             Surface(
                 modifier = Modifier
-                    .clickable {
-                        if (latestSelectedItem.value != position) {
-                            latestSelectedItem.value = position
-                        } else {
-                            latestSelectedItem.value = -1
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = rememberRipple(
+                            bounded = true,
+                            color = blueColor
+                        ),
+                        onClick = {
+                            updater.moveItemFromInventoryToInventory(itemDto, true, true)
                         }
-                    },
-                color = if (latestSelectedItem.value == position) Color(94, 94, 94)
+                    ),
+                color = if (isSelected) Color(94, 94, 94)
                 else Color(139, 139, 139)
             ) {
                 BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
@@ -120,7 +112,7 @@ private fun InventoryGrid() {
                             .clip(RectangleShape)
                             .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
                             .padding(4.dp),
-                        bitmap = imageBitmap,
+                        bitmap = ImageBitmap.imageResource(item.image),
                         filterQuality = FilterQuality.None,
                         contentDescription = item.value,
                         contentScale = ContentScale.FillWidth,
@@ -140,11 +132,36 @@ private fun InventoryGrid() {
 }
 
 @Composable
-private fun CraftingGrid() {
-    val items = ArrayList<Pair<Item, Int>>()
+private fun CraftingGrid(craftingTable: CraftingTable, updater: InventoryUpdater) {
+    val scope = rememberCoroutineScope()
+    val blueColor = Color(136, 146, 201)
 
-    for (i in 1..9) {
-        items.add(Item.AIR to i)
+    val craftingItems = remember { mutableStateListOf<ItemDto>() }
+
+    LaunchedEffect(updater.updateCounter.value) {
+        Log.d("CraftingTable", "CraftingTable was modified: ${craftingTable.items.toList()}")
+
+        scope.launch(Dispatchers.IO) {
+            val list = arrayListOf<ItemDto>()
+            for (i in 1..craftingTable.size) {
+                val item = craftingTable.items.find { v -> v.position == i } ?: ItemDto(
+                    Item.AIR,
+                    0,
+                    i,
+                    craftingTable.getId()
+                )
+                Log.d("CraftingTable", "Position: $i, Item: ${item.item.value} - ${item.quantity}")
+                list.add(item.copy())
+            }
+            craftingItems.clear()
+            craftingItems.addAll(list)
+        }
+    }
+    DisposableEffect(rememberSystemUiController()) {
+        for (i in 1..craftingTable.size) {
+            craftingItems.add(ItemDto(Item.AIR, 0, i, craftingTable.getId()))
+        }
+        onDispose { }
     }
 
     LazyVerticalGrid(
@@ -156,9 +173,26 @@ private fun CraftingGrid() {
         verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
         userScrollEnabled = false
     ) {
-        items(items, key = { c -> c.second }) { (item, position) ->
-            val imageBitmap = ImageBitmap.imageResource(item.image)
-            Surface(color = Color(139, 69, 19)) {
+        items(items = craftingItems, key = { c -> c.position }) { itemDto ->
+            val item = itemDto.item
+            val interactionSource = remember { MutableInteractionSource() }
+            val selected = updater.initialSelection.value
+            val isSelected = selected == itemDto
+            Surface(
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = rememberRipple(
+                            bounded = true,
+                            color = blueColor
+                        ),
+                        onClick = {
+                            updater.moveItemFromInventoryToInventory(itemDto, false, false)
+                        }
+                    ),
+                color = if (isSelected) Color(94, 94, 94)
+                else Color(139, 139, 139)
+            ) {
                 Image(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -166,7 +200,7 @@ private fun CraftingGrid() {
                         .clip(RectangleShape)
                         .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
                         .padding(4.dp),
-                    bitmap = imageBitmap,
+                    bitmap = ImageBitmap.imageResource(item.image),
                     filterQuality = FilterQuality.None,
                     contentDescription = item.value,
                     contentScale = ContentScale.FillWidth,
@@ -179,10 +213,24 @@ private fun CraftingGrid() {
 
 @Composable
 fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
-
+    val scope = rememberCoroutineScope()
     val grayColor = Color(198, 198, 198)
 
-    Dialog(onDismissRequest = { setShowDialog(false) }) {
+    val craftingTable by remember { mutableStateOf(CraftingTable()) }
+    val inventory by remember { mutableStateOf(Inventory()) }
+
+    val inventoryUpdater by remember { mutableStateOf(InventoryUpdater(inventory, craftingTable)) }
+
+    Dialog(
+        onDismissRequest = {
+            craftingTable.moveAllItemsToInventory(inventory)
+            scope.launch(Dispatchers.IO) {
+                inventory.saveToDatabase()
+                Log.d("Inventory", "Save data")
+            }
+            setShowDialog(false)
+        }
+    ) {
         Surface {
             Card(
                 modifier = Modifier
@@ -194,13 +242,20 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(modifier = Modifier.padding(24.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .padding(24.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            TextShadow(text = "Mesa de Crafteo", style = MaterialTheme.typography.h3)
+                            TextShadow(
+                                text = "Mesa de Crafteo",
+                                style = MaterialTheme.typography.h3
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -224,7 +279,7 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                                     modifier = Modifier
                                         .align(Alignment.Center)
                                 ) {
-                                    CraftingGrid()
+                                    CraftingGrid(craftingTable, inventoryUpdater)
                                 }
                             }
                         }
@@ -238,10 +293,17 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                         ) {
                             BorderedButton(
                                 onClick = {
-
+                                    val (item, quantity) = craftingTable.craftRecipe()
+                                        ?: return@BorderedButton
+                                    craftingTable.items.clear()
+                                    inventory.addItem(item, quantity)
+                                    inventoryUpdater.forceUpdate()
                                 }
                             ) {
-                                TextShadow(text = "Craftear", style = MaterialTheme.typography.button)
+                                TextShadow(
+                                    text = "Craftear",
+                                    style = MaterialTheme.typography.button
+                                )
                             }
                         }
 
@@ -262,7 +324,7 @@ fun CraftingTableDialog(setShowDialog: (Boolean) -> Unit) {
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            InventoryGrid()
+                            InventoryGrid(inventory, inventoryUpdater)
                         }
                     }
                 }

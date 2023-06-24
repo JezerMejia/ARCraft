@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
+import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.ui.components.BorderedButton
 import com.jezerm.pokepc.ui.components.TextShadow
@@ -34,12 +35,18 @@ fun DebugView(controller: NavHostController) {
     }
 
     val showChestDialog = remember { mutableStateOf(false) }
+    val showCraftingDialog = remember { mutableStateOf(false) }
     val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
 
     if (showChestDialog.value)
         ChestInventoryDialog(setShowDialog = {
             showChestDialog.value = it
         }, lastChestOpened.value)
+
+    if (showCraftingDialog.value)
+        CraftingTableDialog(setShowDialog = {
+            showCraftingDialog.value = it
+        })
 
     Scaffold(
         modifier = Modifier
@@ -85,6 +92,13 @@ fun DebugView(controller: NavHostController) {
                     }
                 ) {
                     TextShadow(text = "Abrir cofre #3")
+                }
+                BorderedButton(
+                    onClick = {
+                        showCraftingDialog.value = true
+                    }
+                ) {
+                    TextShadow(text = "Abrir mesa de crafteo")
                 }
             }
         }

@@ -44,11 +44,11 @@ class InventoryTest {
     @Test
     fun removeItem() {
         inventory.addItem(Item.GLASS)
-        inventory.addItem(Item.OAK_PLANKS, 4)
-        inventory.addItem(Item.OBSIDIAN, 2)
+        val oakPos = inventory.addItem(Item.OAK_PLANKS, 4)
+        val obsidianPos = inventory.addItem(Item.OBSIDIAN, 2)
 
-        inventory.removeItem(Item.OAK_PLANKS, 4)
-        inventory.removeItem(Item.OBSIDIAN)
+        inventory.removeItem(oakPos, 4)
+        inventory.removeItem(obsidianPos)
 
         assertArrayEquals(
             arrayOf(
@@ -60,16 +60,16 @@ class InventoryTest {
 
     @Test
     fun findEmptyPosition() {
-        inventory.addItem(Item.GLASS)
-        inventory.addItem(Item.OAK_PLANKS, 4)
+        val glassPos = inventory.addItem(Item.GLASS)
+        val oakPos = inventory.addItem(Item.OAK_PLANKS, 4)
         inventory.addItem(Item.OBSIDIAN, 2)
 
         assertEquals(4, inventory.findEmptyPosition())
 
-        inventory.removeItem(Item.OAK_PLANKS, 4)
+        inventory.removeItem(oakPos, 4)
         assertEquals(2, inventory.findEmptyPosition())
 
-        inventory.removeItem(Item.GLASS)
+        inventory.removeItem(glassPos)
         assertEquals(1, inventory.findEmptyPosition())
 
         inventory.addItem(Item.GLASS)
