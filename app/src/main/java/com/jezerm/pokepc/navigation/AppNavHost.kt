@@ -32,7 +32,7 @@ fun AppNavHost(
             ARScreen(navController)
         }
         composable("credits") {
-            Credits()
+            Credits(navController)
         }
     }
 }

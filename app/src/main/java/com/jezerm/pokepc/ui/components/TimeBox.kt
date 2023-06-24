@@ -40,7 +40,6 @@ fun TimeBox() {
 
     val grayColor = Color(198, 198, 198)
     val timeStart = remember { mutableStateOf<Date?>(null) }
-    val timeEnd = remember { mutableStateOf<Date?>(null) }
     val timerValue = remember { mutableStateOf("00:00") }
     val handler = Handler(Looper.getMainLooper())
     val dateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
@@ -61,7 +60,8 @@ fun TimeBox() {
         scope.launch(Dispatchers.IO) {
             repository.getTimer()?.let { time ->
                 if (time.timeEnd != null) {
-                    timerValue.value = dateFormat.format(time.timeEnd)
+                    val elapsedTime = time.timeEnd!!.time - time.timeStart!!.time
+                    timerValue.value = dateFormat.format(elapsedTime)
                 } else {
                     timeStart.value = time.timeStart
                     updateTimer()

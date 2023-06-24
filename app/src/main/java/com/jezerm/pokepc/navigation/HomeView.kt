@@ -307,7 +307,7 @@ fun HomeView(controller: NavHostController) {
                         BorderedButton(
                             modifier = Modifier.padding(bottom = 12.dp),
                             onClick = {
-                                controller.navigate("debug")
+                                controller.navigate("credits")
                             }
                         ) {
                             TextShadow(text = "DEBUG", style = MaterialTheme.typography.button)

@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
@@ -49,7 +50,7 @@ import com.jezerm.pokepc.utils.CreateNode
 
 @Preview
 @Composable
-fun ARScreen() {
+fun ARScreen(navController: NavController) {
     val context = LocalContext.current
 
     val grayColor = Color(198, 198, 198)
@@ -149,6 +150,13 @@ fun ARScreen() {
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
                     showSmeltingDialog.value = true
+                }
+                beaconNode.onTap = { motionEvent, renderable ->
+                    // if(inventory.hasItem(Item.BEACON)){
+                        navController.navigate("credits")
+                    // } else {
+                    // Toast.makeText(context, "Vuelve cuando consigas el Beacon", Toast.LONG).show()
+                    // }
                 }
 
                 arSceneView.addChild(craftingTableNode)
