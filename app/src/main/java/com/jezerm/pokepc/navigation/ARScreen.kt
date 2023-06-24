@@ -1,7 +1,7 @@
 package com.jezerm.pokepc.navigation
 
 import android.media.MediaPlayer
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,7 +33,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -43,8 +41,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.ar.core.AugmentedImageDatabase
-import com.jezerm.pokepc.R
-import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
@@ -63,7 +59,6 @@ import com.jezerm.pokepc.ui.components.TimeBox
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
-import io.github.sceneview.ar.ARScene
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.jezerm.pokepc.R
@@ -226,11 +221,15 @@ fun ARScreen(navController: NavController) {
                     showSmeltingDialog.value = true
                 }
                 beaconNode.onTap = { motionEvent, renderable ->
-                     if(inventory.hasItem(Item.BEACON) && inventory.hasItem(Item.CAKE)){
+                    if (inventory.hasItem(Item.BEACON) && inventory.hasItem(Item.CAKE)) {
                         navController.navigate("credits")
-                     } else {
-                        Toast.makeText(context, "Vuelve cuando consigas el Beacon y el Pastel", Toast.LENGTH_LONG).show()
-                     }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Vuelve cuando consigas el Beacon y el Pastel",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
 
                 chickenNode.onTap = { motionEvent, renderable ->
@@ -238,7 +237,7 @@ fun ARScreen(navController: NavController) {
                     newItemMP.start()
 
                     lastNewItem.value = ItemInfo.GOT_NEW_EGG
-                  
+
                     inventory.addItem(lastNewItem.value.item)
                     scope.launch(Dispatchers.IO) {
                         inventory.saveToDatabase()
