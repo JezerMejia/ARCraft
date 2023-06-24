@@ -48,25 +48,25 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
 
     fun hasItem(item: Item): Boolean = items.any { itemDto -> itemDto.item == item }
 
-    fun addItem(item: Item, quantity: Int = 1): Boolean {
+    fun addItem(item: Item, quantity: Int = 1): Int {
         var itemDto = items.find { itemDto -> itemDto.item == item }
         // If there is already an item and it's stackable, return false
-        if (itemDto != null && !itemDto.item.stackable) return false
+        if (itemDto != null && !itemDto.item.stackable) return -1
         // If there is no item, create a DTO for it
         if (itemDto == null) {
             val emptyPosition = findEmptyPosition()
-            if (emptyPosition == -1) return false
+            if (emptyPosition == -1) return -1
 
             itemDto = ItemDto(item, 0, emptyPosition, getId())
             items.add(itemDto)
         }
         itemDto.quantity += quantity
         itemDto.inventoryId = getId()
-        return true
+        return itemDto.position
     }
 
-    fun removeItem(item: Item, quantity: Int = 1): Boolean {
-        val itemDto = items.find { itemDto -> itemDto.item == item } ?: return false
+    fun removeItem(position: Int, quantity: Int = 1): Boolean {
+        val itemDto = items.find { itemDto -> itemDto.position == position } ?: return false
 
         itemDto.quantity -= quantity
         // If there are no items left, remove it from the inventory
@@ -76,65 +76,71 @@ open class Inventory(val size: Int = 20, val type: InventoryType = InventoryType
         return true
     }
 
-    fun moveItem(item: Item, position: Int): Boolean {
-        val itemDto = items.find { itemDto -> itemDto.item == item } ?: return false
-        val newPosDto = items.find { newDto -> newDto.position == position }
+    fun moveItem(position: Int, endPosition: Int): Boolean {
+        val itemDto = items.find { itemDto -> itemDto.position == position } ?: return false
+        val newPosDto = items.find { newDto -> newDto.position == endPosition }
         if (newPosDto != null) return false
-        itemDto.position = position
+        itemDto.position = endPosition
         return true
     }
 
     fun addItemToPosition(
         item: Item,
         quantity: Int = 1,
-        position: Int = findEmptyPosition()
+        position: Int = findEmptyPosition(),
+        replace: Boolean = true
     ): Boolean {
-        var itemDto = items.find { itemDto -> itemDto.item == item && itemDto.position == position }
-        if (itemDto != null) return false
-
-        itemDto = ItemDto(item, quantity, position, getId())
-        items.add(itemDto)
+        val foundInPosition =
+            items.find { itemDto -> itemDto.item == item && itemDto.position == position }
+        if (foundInPosition != null && !replace) return false
+        val foundItem = items.find { itemDto -> itemDto.item == item }
+        if (foundItem != null && replace) {
+            foundItem.quantity += quantity
+        } else {
+            val itemDto = ItemDto(item, quantity, position, getId())
+            items.add(itemDto)
+        }
         return true
     }
 
     fun addItemsToPositions(pairs: List<Pair<Item, Int>>) {
         for (pair in pairs) {
             val (item, position) = pair
-            addItemToPosition(item, 1, position)
+            addItemToPosition(item, 1, position, false)
         }
     }
 
     fun moveItemFromInventory(
         inventory: Inventory,
-        item: Item,
+        position: Int,
         quantity: Int = 1,
-        position: Int = findEmptyPosition()
+        endPosition: Int = findEmptyPosition(),
+        replace: Boolean = true
     ): Boolean {
-        if (!inventory.hasItem(item)) return false
-        if (position == -1) return false
-        inventory.removeItem(item)
-        return this.addItemToPosition(item, quantity, position)
-    }
+        val itemDto = inventory.items.find { itemDto -> itemDto.position == position } ?: return false
+        inventory.removeItem(position, quantity)
 
-    fun moveItemToInventory(inventory: Inventory, item: Item, quantity: Int = 1): Boolean {
-        if (!this.hasItem(item)) return false
-        this.removeItem(item, quantity)
-        inventory.addItem(item, quantity)
+        if (endPosition == -1) {
+            this.addItem(itemDto.item, quantity)
+        } else {
+            this.addItemToPosition(itemDto.item, quantity, endPosition, replace)
+        }
         return true
     }
 
     fun moveItemToInventory(
         inventory: Inventory,
-        item: Item,
+        position: Int,
         quantity: Int = 1,
-        position: Int = -1
+        endPosition: Int = -1,
+        replace: Boolean = true
     ): Boolean {
-        if (!this.hasItem(item)) return false
-        this.removeItem(item, quantity)
-        if (position == -1) {
-            inventory.addItem(item, quantity)
+        val itemDto = items.find { itemDto -> itemDto.position == position } ?: return false
+        this.removeItem(position, quantity)
+        if (endPosition == -1) {
+            inventory.addItem(itemDto.item, quantity)
         } else {
-            inventory.addItemToPosition(item, quantity, position)
+            inventory.addItemToPosition(itemDto.item, quantity, endPosition, replace)
         }
         return true
     }

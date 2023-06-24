@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -32,6 +34,7 @@ import com.jezerm.pokepc.R
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Inventory
+import com.jezerm.pokepc.entities.InventoryUpdater
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
@@ -49,10 +52,9 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
     val inventory by remember { mutableStateOf(Inventory()) }
     val inventoryItems = remember { mutableStateListOf<ItemDto>() }
 
-    var updateCounter by remember { mutableStateOf(0) }
-    var initialSelection by remember { mutableStateOf<ItemDto?>(null) }
+    val inventoryUpdater by remember { mutableStateOf(InventoryUpdater(inventory, chest)) }
 
-    LaunchedEffect(updateCounter) {
+    LaunchedEffect(inventoryUpdater.updateCounter.value) {
         Log.d("Chest", "Chest was modified: ${chest.items.toList()}")
 
         scope.launch(Dispatchers.IO) {
@@ -71,7 +73,7 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
             chestItems.addAll(list)
         }
     }
-    LaunchedEffect(updateCounter) {
+    LaunchedEffect(inventoryUpdater.updateCounter.value) {
         Log.d("Inventory", "Inventory was modified: ${inventory.items.toList()}")
 
         scope.launch(Dispatchers.IO) {
@@ -107,34 +109,6 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
         onDispose { }
     }
 
-    fun moveItem(itemDto: ItemDto) {
-        if (initialSelection == null) {
-            initialSelection = if (itemDto.item != Item.AIR) itemDto else null
-            return
-        }
-        val endSelection = itemDto
-        val initSelection = initialSelection!!
-
-        if (initSelection.inventoryId == endSelection.inventoryId) {
-            val inv = if (endSelection.inventoryId == chest.getId()) chest else inventory
-            val result = inv.moveItem(initSelection.item, endSelection.position)
-            Log.d("Chest", "Moved: $result - ${inv.items.toList()}")
-        } else {
-            val initInv = if (initSelection.inventoryId == chest.getId()) chest else inventory
-            val endInv = if (endSelection.inventoryId == chest.getId()) chest else inventory
-            val result = initInv.moveItemToInventory(
-                endInv,
-                initSelection.item,
-                initSelection.quantity,
-                endSelection.position
-            )
-            Log.d("Chest", "Moved: $result)}")
-        }
-
-        updateCounter++
-        initialSelection = null
-    }
-
     val grayColor = Color(198, 198, 198)
     val blueColor = Color(136, 146, 201)
 
@@ -154,7 +128,11 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                 shape = RectangleShape,
                 backgroundColor = grayColor
             ) {
-                Column(modifier = Modifier.padding(24.dp)) {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -217,10 +195,12 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                                                 color = blueColor
                                             ),
                                             onClick = {
-                                                moveItem(itemDto)
+                                                inventoryUpdater.moveItemFromInventoryToInventory(
+                                                    itemDto
+                                                )
                                             }
                                         ),
-                                    color = if (initialSelection?.item == item) Color(
+                                    color = if (inventoryUpdater.initialSelection.value?.item == item) Color(
                                         94,
                                         94,
                                         94
@@ -305,10 +285,12 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
                                                 color = blueColor
                                             ),
                                             onClick = {
-                                                moveItem(itemDto)
+                                                inventoryUpdater.moveItemFromInventoryToInventory(
+                                                    itemDto
+                                                )
                                             }
                                         ),
-                                    color = if (initialSelection?.item == item) Color(
+                                    color = if (inventoryUpdater.initialSelection.value?.item == item) Color(
                                         94,
                                         94,
                                         94
