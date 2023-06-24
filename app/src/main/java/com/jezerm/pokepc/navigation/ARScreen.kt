@@ -1,5 +1,6 @@
 package com.jezerm.pokepc.navigation
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -152,8 +153,9 @@ fun ARScreen(navController: NavController) {
                     showSmeltingDialog.value = true
                 }
                 beaconNode.onTap = { motionEvent, renderable ->
+                    Log.d("Beacon", "aaaaaaaaaaaaaa")
                     // if(inventory.hasItem(Item.BEACON)){
-                        navController.navigate("credits")
+                    navController.navigate("credits")
                     // } else {
                     // Toast.makeText(context, "Vuelve cuando consigas el Beacon", Toast.LONG).show()
                     // }

@@ -41,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -59,6 +60,10 @@ fun Credits(navController: NavController) {
         coroutineScope.launch(Dispatchers.IO){
             val repository = RoomRepository.getInstance()
             val time = repository.getTimer()
+            if(time.timeEnd == null) {
+                repository.endTimer()
+                time.timeEnd = Date()
+            }
             val elapsedTime = time.timeEnd!!.time - time.timeStart!!.time
             completionTime.value = dateFormat.format(elapsedTime)
             scrollState.animateScrollBy(2000f, tween(20000, 300, LinearEasing))

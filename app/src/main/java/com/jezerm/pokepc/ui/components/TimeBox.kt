@@ -52,7 +52,6 @@ fun TimeBox() {
             val formattedTime = dateFormat.format(Date(elapsedTime))
             timerValue.value = formattedTime
             updateTimer()
-            Log.d("TimeBox", formattedTime)
         }, 1000)
     }
 
