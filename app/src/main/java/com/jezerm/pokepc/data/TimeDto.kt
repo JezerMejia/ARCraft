@@ -4,9 +4,9 @@ import androidx.room.*
 import java.util.Date
 
 @Entity("tblTime")
-@TypeConverters(TimeConverter::class)
+@TypeConverters(TimeConverters::class)
 data class TimeDto(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo
     val timeId: Int,
     @ColumnInfo("timeStart")
@@ -16,10 +16,10 @@ data class TimeDto(
 )
 
 
-class TimeConverter {
+class TimeConverters {
     @TypeConverter
-    fun toDate(timestamp: Long?): Date? {
-        return if (timestamp == null) null else Date(timestamp)
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
     }
 
     @TypeConverter

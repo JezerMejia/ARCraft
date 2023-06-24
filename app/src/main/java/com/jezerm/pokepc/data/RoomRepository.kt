@@ -10,6 +10,11 @@ class RoomRepository private constructor(private val dao: ItemDtoDao, private va
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
+    suspend fun getTimer(): TimeDto {
+        return timeDao.getTimeDto()
+    }
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
     suspend fun startTimer() {
         val currentDate = Date()
         val time = TimeDto(0, currentDate, null)

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TimeDtoDao {
-    @Query("SELECT * FROM tblItem LIMIT 1")
+    @Query("SELECT * FROM tblTime LIMIT 1")
     fun getTimeDto(): TimeDto
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
