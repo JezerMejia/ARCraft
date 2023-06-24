@@ -91,8 +91,8 @@ class CraftingTableTest {
     @Test
     fun moveItemsToCraftingTable() {
         val inventory = Inventory()
-        inventory.addItem(Item.SUGAR_CANE, 4)
-        craftingTable.moveItemFromInventory(inventory, Item.SUGAR_CANE)
+        val position = inventory.addItem(Item.SUGAR_CANE, 4)
+        craftingTable.moveItemFromInventory(inventory, position)
 
         assertArrayEquals(
             arrayOf(

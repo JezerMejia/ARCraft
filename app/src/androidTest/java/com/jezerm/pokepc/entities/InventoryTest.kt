@@ -74,8 +74,8 @@ class InventoryTest {
     fun undoChanges() = runTest(UnconfinedTestDispatcher()) {
         GlobalScope.launch(Dispatchers.IO) {
             val craftingTable = CraftingTable()
-            inventory.addItem(Item.SUGAR, 4)
-            craftingTable.moveItemFromInventory(inventory, Item.SUGAR)
+            val position = inventory.addItem(Item.SUGAR, 4)
+            craftingTable.moveItemFromInventory(inventory, position)
         }.join()
     }
 }
