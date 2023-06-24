@@ -64,6 +64,7 @@ import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.jezerm.pokepc.R
 
 @Preview
 @Composable
@@ -213,12 +214,11 @@ fun ARScreen(navController: NavController) {
                     showSmeltingDialog.value = true
                 }
                 beaconNode.onTap = { motionEvent, renderable ->
-                    Log.d("Beacon", "aaaaaaaaaaaaaa")
-                    // if(inventory.hasItem(Item.BEACON)){
-                    navController.navigate("credits")
-                    // } else {
-                    // Toast.makeText(context, "Vuelve cuando consigas el Beacon", Toast.LONG).show()
-                    // }
+                     if(inventory.hasItem(Item.BEACON) && inventory.hasItem(Item.CAKE)){
+                        navController.navigate("credits")
+                     } else {
+                        Toast.makeText(context, "Vuelve cuando consigas el Beacon y el Pastel", Toast.LENGTH_LONG).show()
+                     }
                 }
 
                 chickenNode.onTap = { motionEvent, renderable ->
