@@ -1,6 +1,7 @@
 package com.jezerm.pokepc.navigation
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,9 +49,11 @@ import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
 import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.dialog.InventoryDialog
+import com.jezerm.pokepc.dialog.ItemInfoDialog
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Inventory
 import com.jezerm.pokepc.entities.Item
+import com.jezerm.pokepc.entities.ItemInfo
 import com.jezerm.pokepc.ui.components.TextShadow
 import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
@@ -75,7 +78,10 @@ fun ARScreen() {
     val showChestDialog = remember { mutableStateOf(false) }
     val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
 
-    val latestSelectedItemPos = remember { mutableStateOf<ItemDto?>(null) }
+    val showNewItemDialog = remember { mutableStateOf(false) }
+    val lastNewItem = remember { mutableStateOf(ItemInfo.BEACON) }
+
+    var latestSelectedItem by remember { mutableStateOf(Item.STICK) }
 
     var updateCounter by remember { mutableStateOf(0) }
     val inventory by remember { mutableStateOf(Inventory()) }
@@ -133,6 +139,14 @@ fun ARScreen() {
             updateCounter++
             showChestDialog.value = it
         }, lastChestOpened.value)
+
+    if (showNewItemDialog.value)
+        ItemInfoDialog(
+            setShowDialog = {
+                showNewItemDialog.value = it
+            },
+            lastNewItem.value
+        )
 
     val constraints = ConstraintSet {
         val inventoryBox = createRefFor("inventoryBox")
@@ -194,6 +208,38 @@ fun ARScreen() {
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
                     showSmeltingDialog.value = true
+                }
+
+                chickenNode.onTap = { motionEvent, renderable ->
+                    lastNewItem.value = ItemInfo.GOT_NEW_EGG
+                    inventory.addItem(lastNewItem.value.item)
+                    scope.launch(Dispatchers.IO) {
+                        inventory.saveToDatabase()
+                    }
+                    showNewItemDialog.value = true
+                }
+                cowNode.onTap = { motionEvent, renderable ->
+                    if (latestSelectedItem == Item.BUCKET) {
+                        lastNewItem.value = ItemInfo.GOT_NEW_MILK_BUCKET
+                        inventory.addItem(lastNewItem.value.item)
+                        inventory.removeItem(Item.BUCKET)
+                        scope.launch(Dispatchers.IO) {
+                            inventory.saveToDatabase()
+                            updateCounter++
+                        }
+                        showNewItemDialog.value = true
+                    }
+                }
+                witherNode.onTap = { motionEvent, renderable ->
+                    if (latestSelectedItem == Item.DIAMOND_SWORD) {
+                        lastNewItem.value = ItemInfo.GOT_NEW_NETHER_STAR
+                        inventory.addItem(lastNewItem.value.item)
+                        scope.launch(Dispatchers.IO) {
+                            inventory.saveToDatabase()
+                            updateCounter++
+                        }
+                        showNewItemDialog.value = true
+                    }
                 }
 
                 arSceneView.addChild(craftingTableNode)
@@ -269,9 +315,9 @@ fun ARScreen() {
                                 Surface(
                                     modifier = Modifier
                                         .clickable {
-                                            latestSelectedItemPos.value = itemDto
+                                            latestSelectedItem = item
                                         },
-                                    color = if (latestSelectedItemPos.value == itemDto) Color(
+                                    color = if (latestSelectedItem == item) Color(
                                         94,
                                         94,
                                         94
