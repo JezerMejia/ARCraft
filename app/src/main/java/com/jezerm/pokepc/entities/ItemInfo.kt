@@ -21,9 +21,17 @@ enum class ItemInfo(val item: Item, val description: String) {
         Item.MILK_BUCKET,
         "Puedes conseguir un cubo de leche al ordeñar una vaca con un cubo vacío."
     ),
+    GOT_NEW_MILK_BUCKET(
+        Item.MILK_BUCKET,
+        "Ha conseguido 3 cubos con leche! Debe de ser su dia de suerte."
+    ),
     EGG(
         Item.EGG,
         "Las gallinas sueltan huevos. Busca una gallina y tócala para que te suelte uno."
+    ),
+    GOT_NEW_EGG(
+        Item.EGG,
+        "Ha conseguido un huevo. Con esto bastara para el pastel!"
     ),
     SUGAR_CANE(
         Item.SUGAR_CANE,
@@ -52,6 +60,10 @@ enum class ItemInfo(val item: Item, val description: String) {
     NETHER_STAR(
         Item.NETHER_STAR,
         "Una estrella extraña que suelta el temible Wither al morir."
+    ),
+    GOT_NEW_NETHER_STAR(
+        Item.NETHER_STAR,
+        "Una estrella extraña que brilla ominosamente. Podria funcionar perfectamente para darle poder a un beacon!"
     ),
     DIAMOND(
         Item.DIAMOND,
