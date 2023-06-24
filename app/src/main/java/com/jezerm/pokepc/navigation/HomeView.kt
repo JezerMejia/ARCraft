@@ -347,7 +347,8 @@ fun HomeView(controller: NavHostController) {
                     .fillMaxWidth()
                     .background(Color(0, 0, 0, 100))
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = 24.dp, top = 8.dp),
+                    .padding(bottom = 8.dp, top = 8.dp)
+                    .systemBarsPadding(),
             ) {
                 BorderedButton(
                     modifier = Modifier

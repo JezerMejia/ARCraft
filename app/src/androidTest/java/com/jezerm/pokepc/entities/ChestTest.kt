@@ -31,7 +31,7 @@ class ChestTest {
             context, ItemDtoRoomDatabase::class.java
         ).build()
 
-        RoomRepository.init(db.itemDtoDao())
+        RoomRepository.init(db.itemDtoDao(), db.timeDtoDao())
     }
 
     @After
