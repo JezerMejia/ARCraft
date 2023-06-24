@@ -1,5 +1,6 @@
 package com.jezerm.pokepc.navigation
 
+import android.media.MediaPlayer
 import android.os.Build
 import android.view.WindowInsetsController
 import androidx.compose.foundation.Image
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.jezerm.pokepc.R
 import com.jezerm.pokepc.dialog.ItemInfoDialog
 import com.jezerm.pokepc.entities.Item
 import com.jezerm.pokepc.entities.ItemInfo
@@ -207,6 +210,8 @@ fun LazyGridScope.RecipeCards() {
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun HomeView(controller: NavHostController) {
+    val context = LocalContext.current
+
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
@@ -245,6 +250,7 @@ fun HomeView(controller: NavHostController) {
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = {
+                        MediaPlayer.create(context, R.raw.button_click).start()
                         controller.navigate("poke")
                     }
                 ) {
@@ -286,6 +292,7 @@ fun HomeView(controller: NavHostController) {
                         BorderedButton(
                             modifier = Modifier.padding(bottom = 12.dp),
                             onClick = {
+                                MediaPlayer.create(context, R.raw.button_click).start()
                                 controller.navigate("howto")
                             }
                         ) {
@@ -307,6 +314,7 @@ fun HomeView(controller: NavHostController) {
                         BorderedButton(
                             modifier = Modifier.padding(bottom = 12.dp),
                             onClick = {
+                                MediaPlayer.create(context, R.raw.button_click).start()
                                 controller.navigate("debug")
                             }
                         ) {
