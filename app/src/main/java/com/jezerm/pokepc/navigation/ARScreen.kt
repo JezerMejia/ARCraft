@@ -36,6 +36,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.style.TextAlign
 import com.google.ar.core.AugmentedImageDatabase
+import com.google.ar.core.Config
+import com.gorisse.thomas.lifecycle.lifecycleScope
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.entities.Item
@@ -114,18 +116,20 @@ fun ARScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
         ARScene(
             modifier = Modifier.fillMaxSize(),
-            planeRenderer = true,
+            planeRenderer = false,
             onCreate = { arSceneView ->
-                val chestNode = CreateNode("chest", context)
-                val enderChestNode = CreateNode("ender_chest", context)
-                val xmasChestNode = CreateNode("xmas_chest", context)
-                val craftingTableNode = CreateNode("crafting_table", context)
-                val furnaceNode = CreateNode("furnace", context)
-                val cowNode = CreateNode("cow", context)
-                val chickenNode = CreateNode("chicken", context)
-                val witherNode = CreateNode("wither", context)
-                val beaconNode = CreateNode("beacon", context)
-                val earthNode = CreateNode("earth", context)
+                val scope = arSceneView.lifecycleScope
+                Log.d("SceneView1", "size: ${arSceneView.children.size}")
+                val chestNode = CreateNode("chest", context, scope)
+                val enderChestNode = CreateNode("ender_chest", context, scope)
+                val xmasChestNode = CreateNode("xmas_chest", context, scope)
+                val craftingTableNode = CreateNode("crafting_table", context, scope)
+                val furnaceNode = CreateNode("furnace", context, scope)
+                val cowNode = CreateNode("cow", context, scope)
+                val chickenNode = CreateNode("chicken", context, scope)
+                val witherNode = CreateNode("wither", context, scope)
+                val beaconNode = CreateNode("beacon", context, scope)
+                val earthNode = CreateNode("earth", context, scope)
 
                 craftingTableNode.onTap = { motionEvent, renderable ->
                     showCraftingDialog.value = true
