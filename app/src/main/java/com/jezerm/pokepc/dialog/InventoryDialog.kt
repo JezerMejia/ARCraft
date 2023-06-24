@@ -50,7 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-private fun InventoryGrid() {
+private fun InventoryGridInDialog() {
     val inventory = Inventory()
 
     val items = remember { mutableStateListOf<ItemDto>() }
@@ -166,7 +166,7 @@ fun InventoryDialog(
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        InventoryGrid()
+                        InventoryGridInDialog()
                     }
                 }
             }
