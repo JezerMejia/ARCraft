@@ -55,70 +55,92 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun InventoryDialog(setShowDialog: (Boolean) -> Unit) {
+private fun InventoryGridInDialog() {
+    val inventory = Inventory()
+
+    val items = remember { mutableStateListOf<ItemDto>() }
+    val latestSelectedItem = remember { mutableStateOf(-1) }
+
     val scope = rememberCoroutineScope()
-
-    val inventory by remember { mutableStateOf(Inventory()) }
-    val inventoryItems = remember { mutableStateListOf<ItemDto>() }
-
-    var updateCounter by remember { mutableStateOf(0) }
-    var initialSelection by remember { mutableStateOf<ItemDto?>(null) }
-
-    LaunchedEffect(updateCounter) {
-        Log.d("Inventory", "Inventory was modified: ${inventory.items.toList()}")
-
+    DisposableEffect(rememberSystemUiController()) {
         scope.launch(Dispatchers.IO) {
-            val list = arrayListOf<ItemDto>()
-            for (i in 1..inventory.size) {
+            inventory.initFromDatabase()
+            items.clear()
+            for (i in 1..20) {
                 val item = inventory.items.find { v -> v.position == i } ?: ItemDto(
                     Item.AIR,
-                    0,
+                    1,
                     i,
                     inventory.getId()
                 )
-                Log.d("Inventory", "Position: $i, Item: ${item.item.value} - ${item.quantity}")
-                list.add(item)
+                Log.d("PlayerInventory", "Position: $i, Item: ${item.item.value}")
+                items.add(item)
             }
-            inventoryItems.clear()
-            inventoryItems.addAll(list)
-        }
-    }
-
-    DisposableEffect(rememberSystemUiController()) {
-        for (i in 1..inventory.size) {
-            inventoryItems.add(ItemDto(Item.AIR, 0, i, inventory.getId()))
-        }
-        scope.launch(Dispatchers.IO) {
-            inventory.initFromDatabase()
         }
         onDispose { }
     }
 
-    fun moveItem(itemDto: ItemDto) {
-        if (initialSelection == null) {
-            initialSelection = if (itemDto.item != Item.AIR) itemDto else null
-            return
+    LazyVerticalGrid(
+        modifier = Modifier
+            .widthIn(100.dp, 200.dp)
+            .heightIn(280.dp, 400.dp),
+        columns = GridCells.Fixed(4),
+        userScrollEnabled = false
+    ) {
+        items(items, key = { c -> c.position }) { itemDto ->
+            val item = itemDto.item
+            val quantity = itemDto.quantity
+            val position = itemDto.position
+            val imageBitmap = ImageBitmap.imageResource(item.image)
+            Surface(
+                modifier = Modifier
+                    .clickable {
+                        if (latestSelectedItem.value != position) {
+                            latestSelectedItem.value = position
+                        } else {
+                            latestSelectedItem.value = -1
+                        }
+                    },
+                color = if (latestSelectedItem.value == position) Color(94, 94, 94)
+                else Color(139, 139, 139)
+            ) {
+                BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .clip(RectangleShape)
+                            .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
+                            .padding(4.dp),
+                        bitmap = imageBitmap,
+                        filterQuality = FilterQuality.None,
+                        contentDescription = item.value,
+                        contentScale = ContentScale.FillWidth,
+                        alignment = Alignment.Center
+                    )
+                    if (item != Item.AIR) {
+                        TextShadow(
+                            modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
+                            text = quantity.toString(),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
-        val endSelection = itemDto
-        val initSelection = initialSelection!!
-
-        val inv = inventory
-        val result = inv.moveItem(initSelection.item, endSelection.position)
-        Log.d("Chest", "Moved: $result - ${inv.items.toList()}")
-
-        updateCounter++
-        initialSelection = null
     }
+}
 
-    val blueColor = Color(136, 146, 201)
+@Composable
+fun InventoryDialog(
+    setShowDialog: (Boolean) -> Unit,
+    setCurrentHotbar: (ArrayList<Pair<Item, Int>>) -> Unit
+) {
     val grayColor = Color(198, 198, 198)
 
     Dialog(
         onDismissRequest = {
-            scope.launch(Dispatchers.IO) {
-                inventory.saveToDatabase()
-                Log.d("Inventory", "Save data")
-            }
+            setCurrentHotbar(ArrayList())
             setShowDialog(false)
         }) {
         Surface {
@@ -149,75 +171,7 @@ fun InventoryDialog(setShowDialog: (Boolean) -> Unit) {
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        LazyVerticalGrid(
-                            modifier = Modifier
-                                .widthIn(100.dp, 200.dp)
-                                .heightIn(260.dp, 270.dp),
-                            columns = GridCells.Fixed(4),
-                            userScrollEnabled = false
-                        ) {
-                            items(inventoryItems, key = { c -> c.position }) { itemDto ->
-                                val item = itemDto.item
-                                val quantity = itemDto.quantity
-                                val position = itemDto.position
-                                val imageBitmap = ImageBitmap.imageResource(item.image)
-                                val interactionSource = remember { MutableInteractionSource() }
-                                Surface(
-                                    modifier = Modifier
-                                        .clickable(
-                                            interactionSource = interactionSource,
-                                            indication = rememberRipple(
-                                                bounded = true,
-                                                color = blueColor
-                                            ),
-                                            onClick = {
-                                                moveItem(itemDto)
-                                            }
-                                        ),
-                                    color = if (initialSelection?.item == item) Color(
-                                        94,
-                                        94,
-                                        94
-                                    )
-                                    else Color(139, 139, 139)
-                                ) {
-                                    BoxWithConstraints(contentAlignment = Alignment.BottomEnd) {
-                                        Image(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .wrapContentHeight()
-                                                .clip(RectangleShape)
-                                                .insetBorder(lightSize = 4.dp, darkSize = 4.dp, borderPadding = 0.dp)
-                                                .padding(4.dp),
-                                            bitmap = imageBitmap,
-                                            filterQuality = FilterQuality.None,
-                                            contentDescription = item.value,
-                                            contentScale = ContentScale.FillWidth,
-                                            alignment = Alignment.Center
-                                        )
-                                        if (item != Item.AIR) {
-                                            TextShadow(
-                                                modifier = Modifier.padding(end = 3.dp, bottom = 3.dp),
-                                                text = quantity.toString(),
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        TextShadow(
-                            text = "Hotbar",
-                            style = MaterialTheme.typography.h3,
-                            textAlign = TextAlign.Center
-                        )
+                        InventoryGridInDialog()
                     }
                 }
             }

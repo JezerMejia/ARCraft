@@ -9,6 +9,7 @@ enum class Item(val value: String, val image: Int = 0, val stackable: Boolean = 
     OAK_LOG("Tronco de madera", R.drawable.oak_log),
     OAK_PLANKS("Tablones de madera", R.drawable.oak_planks),
     STICK("Palo", R.drawable.stick),
+    RAW_IRON("Hierro crudo", R.drawable.raw_iron),
     IRON("Hierro", R.drawable.iron_ingot),
     DIAMOND("Diamante", R.drawable.diamond),
     SUGAR_CANE("Caña de azúcar", R.drawable.sugar_cane),

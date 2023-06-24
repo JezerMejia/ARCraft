@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
 import com.jezerm.pokepc.dialog.CraftingTableDialog
+import com.jezerm.pokepc.dialog.FurnaceDialog
 import com.jezerm.pokepc.entities.Chest
 import com.jezerm.pokepc.ui.components.BorderedButton
 import com.jezerm.pokepc.ui.components.TextShadow
@@ -21,7 +22,6 @@ import com.jezerm.pokepc.ui.components.TextShadow
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun DebugView(controller: NavHostController) {
-    val scope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
     val systemUiController = rememberSystemUiController()
@@ -34,18 +34,25 @@ fun DebugView(controller: NavHostController) {
         onDispose { }
     }
 
-    val showChestDialog = remember { mutableStateOf(false) }
-    val showCraftingDialog = remember { mutableStateOf(false) }
-    val lastChestOpened = remember { mutableStateOf(Chest.ChestType.ONE) }
+    var showChestDialog by remember { mutableStateOf(false) }
+    var showCraftingDialog by remember { mutableStateOf(false) }
+    var showFurnaceDialog by remember { mutableStateOf(false) }
 
-    if (showChestDialog.value)
+    var lastChestOpened by remember { mutableStateOf(Chest.ChestType.ONE) }
+
+    if (showChestDialog)
         ChestInventoryDialog(setShowDialog = {
-            showChestDialog.value = it
-        }, lastChestOpened.value)
+            showChestDialog = it
+        }, lastChestOpened)
 
-    if (showCraftingDialog.value)
+    if (showCraftingDialog)
         CraftingTableDialog(setShowDialog = {
-            showCraftingDialog.value = it
+            showCraftingDialog = it
+        })
+
+    if (showFurnaceDialog)
+        FurnaceDialog(setShowDialog = {
+            showFurnaceDialog = it
         })
 
     Scaffold(
@@ -71,34 +78,41 @@ fun DebugView(controller: NavHostController) {
             ) {
                 BorderedButton(
                     onClick = {
-                        lastChestOpened.value = Chest.ChestType.ONE
-                        showChestDialog.value = true
+                        lastChestOpened = Chest.ChestType.ONE
+                        showChestDialog = true
                     }
                 ) {
                     TextShadow(text = "Abrir cofre #1")
                 }
                 BorderedButton(
                     onClick = {
-                        lastChestOpened.value = Chest.ChestType.TWO
-                        showChestDialog.value = true
+                        lastChestOpened = Chest.ChestType.TWO
+                        showChestDialog = true
                     }
                 ) {
                     TextShadow(text = "Abrir cofre #2")
                 }
                 BorderedButton(
                     onClick = {
-                        lastChestOpened.value = Chest.ChestType.THREE
-                        showChestDialog.value = true
+                        lastChestOpened = Chest.ChestType.THREE
+                        showChestDialog = true
                     }
                 ) {
                     TextShadow(text = "Abrir cofre #3")
                 }
                 BorderedButton(
                     onClick = {
-                        showCraftingDialog.value = true
+                        showCraftingDialog = true
                     }
                 ) {
                     TextShadow(text = "Abrir mesa de crafteo")
+                }
+                BorderedButton(
+                    onClick = {
+                        showFurnaceDialog = true
+                    }
+                ) {
+                    TextShadow(text = "Abrir horno")
                 }
             }
         }
