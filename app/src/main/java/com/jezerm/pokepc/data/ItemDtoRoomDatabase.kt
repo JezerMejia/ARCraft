@@ -7,10 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import java.util.concurrent.Executors
 
-@Database(entities = arrayOf(ItemDto::class), version = 1, exportSchema = false)
+@Database(entities = arrayOf(ItemDto::class, TimeDto::class), version = 1, exportSchema = false)
 abstract class ItemDtoRoomDatabase : RoomDatabase() {
 
     abstract fun itemDtoDao(): ItemDtoDao
+    abstract fun timeDtoDao(): TimeDtoDao
 
     companion object {
         // Singleton prevents multiple instances of database opening at the
