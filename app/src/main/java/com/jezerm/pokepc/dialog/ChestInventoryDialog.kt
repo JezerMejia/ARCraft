@@ -1,5 +1,7 @@
 package com.jezerm.pokepc.dialog
 
+import android.content.Context
+import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -43,7 +45,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.ChestType) {
+fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.ChestType, context: Context) {
     val scope = rememberCoroutineScope()
 
     val chest by remember { mutableStateOf(Chest(chestType)) }
@@ -118,6 +120,13 @@ fun ChestInventoryDialog(setShowDialog: (Boolean) -> Unit, chestType: Chest.Ches
             inventory.saveToDatabase()
             Log.d("Inventory", "Save data")
         }
+
+        when (IntRange(1, 3).random()) {
+            1 -> MediaPlayer.create(context, R.raw.chest_close_1).start()
+            2 -> MediaPlayer.create(context, R.raw.chest_close_2).start()
+            3 -> MediaPlayer.create(context, R.raw.chest_close_3).start()
+        }
+
         setShowDialog(false)
     }) {
         Surface {

@@ -1,6 +1,5 @@
 package com.jezerm.pokepc.navigation
 
-import android.content.Context
 import android.media.MediaPlayer
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -43,7 +42,6 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.ar.core.AugmentedImageDatabase
-import com.google.ar.core.dependencies.i
 import com.jezerm.pokepc.R
 import com.jezerm.pokepc.data.ItemDto
 import com.jezerm.pokepc.dialog.ChestInventoryDialog
@@ -60,7 +58,6 @@ import com.jezerm.pokepc.ui.modifiers.insetBorder
 import com.jezerm.pokepc.ui.modifiers.outsetBorder
 import com.jezerm.pokepc.utils.CreateNode
 import io.github.sceneview.ar.ARScene
-import io.github.sceneview.light.position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -75,6 +72,7 @@ fun ARScreen() {
     val buttonClickedMP = MediaPlayer.create(context, R.raw.button_click)
     val newItemMP = MediaPlayer.create(context, R.raw.new_item)
     val newItemBigMP = MediaPlayer.create(context, R.raw.new_item_big)
+    val openChestMP = MediaPlayer.create(context, R.raw.chest_open)
 
     val showInventoryDialog = remember { mutableStateOf(false) }
     val showCraftingDialog = remember { mutableStateOf(false) }
@@ -145,7 +143,7 @@ fun ARScreen() {
         ChestInventoryDialog(setShowDialog = {
             updateCounter++
             showChestDialog.value = it
-        }, lastChestOpened.value)
+        }, lastChestOpened.value, context)
 
     if (showNewItemDialog.value)
         ItemInfoDialog(
@@ -203,14 +201,17 @@ fun ARScreen() {
                 }
                 chestNode.onTap = { motionEvent, renderable ->
                     lastChestOpened.value = Chest.ChestType.ONE
+                    openChestMP.start()
                     showChestDialog.value = true
                 }
                 enderChestNode.onTap = { motionEvent, renderable ->
                     lastChestOpened.value = Chest.ChestType.TWO
+                    openChestMP.start()
                     showChestDialog.value = true
                 }
                 xmasChestNode.onTap = { motionEvent, renderable ->
                     lastChestOpened.value = Chest.ChestType.THREE
+                    openChestMP.start()
                     showChestDialog.value = true
                 }
                 furnaceNode.onTap = { motionEvent, renderable ->
