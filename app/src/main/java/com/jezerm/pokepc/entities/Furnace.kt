@@ -2,7 +2,7 @@ package com.jezerm.pokepc.entities
 
 class Furnace: Inventory(1, InventoryType.NO_SAVE) {
     fun canBurnRecipe(recipe: BurnRecipe): Boolean {
-        val itemDto = items.first()
+        val itemDto = items.firstOrNull() ?: return false
         if (itemDto.item != recipe.item) return false
         return true
     }
